@@ -1,120 +1,82 @@
 {
     "shops": [
         {
-            "name": "Pizza Shop",
-            "receiverId": "RECEIVER_TELEGRAM_ID_PIZZA",
+            "name": "May Thingyan Min ဆိုင်",
+            "receiverId": 1851464734,
             "categories": [
                 {
-                    "name": "Pizzas",
+                    "name": "စားဖွယ်များ 🍨",
                     "items": [
                         {
-                            "name": "Margherita Pizza",
-                            "description": "Classic pizza with mozzarella cheese and tomato sauce.",
-                            "price": 10,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                            "name": "သရက်သီးသုပ်",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681722646.png",
+                            "price": 25
                         },
                         {
-                            "name": "Pepperoni Pizza",
-                            "description": "Pizza topped with spicy pepperoni and mozzarella cheese.",
-                            "price": 12,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                            "name": "သင်္ဘောသီးသုပ်",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681871702.png",
+                            "price": 25
+                        },
+                        {
+                            "name": "ပြောင်းဖူးလက်ဖက်သုပ်",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681668479.png",
+                            "price": 25
+                        },
+                        {
+                            "name": "ပြောင်းဖူးလက်ဖက်ထမင်း",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681704351.png",
+                            "price": 30
+                        },
+                        {
+                            "name": "ပြောင်းဖူးထောင်း",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681854144.png",
+                            "price": 30
+                        },
+                        {
+                            "name": "သင်္ဘောသီးထောင်း",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681806992.png",
+                            "price": 30
+                        },
+                        {
+                            "name": "အပ်မှိုထောင်း",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681774639.png",
+                            "price": 40
                         }
                     ]
                 },
                 {
-                    "name": "Sides",
+                    "name": "သောက်ဖွယ်များ 🧋",
                     "items": [
                         {
-                            "name": "Garlic Bread",
-                            "description": "Toasted bread with garlic and butter.",
-                            "price": 5,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                            "name": "Milk Tea",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681963502.png",
+                            "price": 20
                         },
                         {
-                            "name": "Chicken Wings",
-                            "description": "Spicy chicken wings served with ranch sauce.",
-                            "price": 8,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Burger Shop",
-            "receiverId": "RECEIVER_TELEGRAM_ID_BURGER",
-            "categories": [
-                {
-                    "name": "Burgers",
-                    "items": [
-                        {
-                            "name": "Cheeseburger",
-                            "description": "Juicy beef burger with cheese, lettuce, and tomato.",
-                            "price": 9,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                            "name": "Thai Tea",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681943905.png",
+                            "price": 20
                         },
                         {
-                            "name": "Veggie Burger",
-                            "description": "Healthy burger made with a delicious veggie patty.",
-                            "price": 8,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
-                        }
-                    ]
-                },
-                {
-                    "name": "Fries",
-                    "items": [
-                        {
-                            "name": "French Fries",
-                            "description": "Crispy fried potatoes.",
-                            "price": 3,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                            "name": "Thai Tea (Bubble)",
+                            "description": "",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681923246.png",
+                            "price": 25
                         },
                         {
-                            "name": "Onion Rings",
-                            "description": "Crispy onion rings served with dipping sauce.",
-                            "price": 4,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "Sushi Shop",
-            "receiverId": "RECEIVER_TELEGRAM_ID_SUSHI",
-            "categories": [
-                {
-                    "name": "Sushi Rolls",
-                    "items": [
-                        {
-                            "name": "California Roll",
-                            "description": "Delicious sushi roll with crab, avocado, and cucumber.",
-                            "price": 10,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
-                        },
-                        {
-                            "name": "Spicy Tuna Roll",
-                            "description": "Spicy tuna sushi roll topped with avocado.",
-                            "price": 12,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
-                        }
-                    ]
-                },
-                {
-                    "name": "Sashimi",
-                    "items": [
-                        {
-                            "name": "Salmon Sashimi",
-                            "description": "Fresh salmon slices served with soy sauce.",
-                            "price": 15,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
-                        },
-                        {
-                            "name": "Tuna Sashimi",
-                            "description": "Fresh tuna slices served with wasabi.",
-                            "price": 15,
-                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                            "name": "SHARK Energy Drink  ",
+                            "description": "2 ဘူး - 55",
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681896990.png",
+                            "price": 30
                         }
                     ]
                 }

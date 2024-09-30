@@ -10,7 +10,8 @@ const userCarts = {} // Store the user's cart (products and quantities)
 
 // Helper to set user state
 const setUserState = (chatId, state, data = {}) => {
-    userStates[chatId] = { state, ...data }
+    const currentUserStates = state === 'SELECT_SHOP' ? {} : userStates[chatId]
+    userStates[chatId] = { ...currentUserStates, ...data, state }
 }
 
 // Helper to initialize the user's cart if not yet created
@@ -23,23 +24,23 @@ const initializeCart = (chatId) => {
 // Send a list of shops for the user to choose from
 const showShopMenu = (chatId) => {
     const shopList = shops.map((shop, index) => `${index + 1}. ${shop.name}`).join('\n')
-    const message = `Please select a shop to order from:\n\n${shopList}`
+    const message = `🔘 အော်ဒါမှာယူရန် ဆိုင်ကိုရွေးချယ်ပါ။ (eg. 1)\n\n${shopList}`
     bot.sendMessage(chatId, message)
 }
 
 // Send a list of categories from the selected shop
 const showCategoryMenu = (chatId, shop) => {
     const categories = shop.categories.map((category, index) => `${index + 1}. ${category.name}`).join('\n')
-    const message = `Welcome to *${shop.name}*! Please select a category:\n\n${categories}`
+    const message = `🍱 *${shop.name}* မှကြိုဆိုပါတယ်! အမျိုးအစားတခုကို ရွေးချယ်ပါ။ (eg. 1)\n\n${categories}`
     bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
 }
 
 // Send a list of products from the selected category
 const showProducts = (chatId, category) => {
     const products = category.items
-        .map((item, index) => `${index + 1}. ${item.name}: ${item.price} Baht\n   ${item.description}`)
-        .join('\n\n')
-    const message = `You selected *${category.name}*. Here are the available items:\n\n${products}\n\nPlease select a product by number.`
+        .map((item, index) => `${index + 1}. ${item.name}: ${item.price} ဘတ်\n   ${item.description}`)
+        .join('\n')
+    const message = `✅ *${category.name}*ကို ရွေးချယ်ထားပါတယ်။ ရရှိနိုင်သော အမျိုးအမည်များကို ဆက်လက်ကြည့်ပါ။\n\n${products}\n\nကျေးဇူးပြု၍ အမျိုးအမည်တခုကို ရွေးချယ်ပါ။ (eg. 1)`
     bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
 }
 
@@ -59,7 +60,7 @@ const addToCart = (chatId, product, quantity) => {
 // Send product details with an image and ask for quantity
 const showProductDetails = (chatId, product) => {
     bot.sendPhoto(chatId, product.image_url, {
-        caption: `🍽️ *${product.name}* (${product.price} Baht)\n📝 ${product.description}\n\nPlease enter the quantity you would like to add to your cart.`,
+        caption: `🍽️ *${product.name}* (${product.price} ဘတ်)\n📝 ${product.description || '-'}\n\nကျေးဇူးပြု၍ မှာယူလိုသော ပမာဏကို ရိုက်ထည့်ပါ။ (eg. 1)`,
         parse_mode: 'Markdown',
     })
 }
@@ -67,15 +68,18 @@ const showProductDetails = (chatId, product) => {
 // Show the current cart summary to the user
 const showCartSummary = (chatId) => {
     const cart = userCarts[chatId]
+
     if (cart.length === 0) {
-        bot.sendMessage(chatId, 'Your cart is empty.')
+        bot.sendMessage(chatId, '☢️ ရွေးချယ်ထားခြင်း မရှိသေးပါ။')
         return
     }
-    const summary = cart
-        .map((item, index) => `◽ ${item.name} x ${item.quantity} is ${item.price * item.quantity} Baht`)
-        .join('\n')
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const message = `🛍️ *Cart Summary*\n\n${summary}\n\n💰 *Total*: ${total} Baht`
+    const summary = cart
+        .map((item) => ` ◽ ${item.name} x ${item.quantity} - ${item.price * item.quantity} ဘတ်`)
+        .join('\n')
+
+    const message = `🔖 **အကျဉ်းချုပ်**\n\n${summary}\n\n💰 စုစုပေါင်း ${total} ဘတ်`
+
     bot.sendMessage(chatId, escapeMarkdownV2(message), {
         parse_mode: 'MarkdownV2',
     })
@@ -87,13 +91,22 @@ const showCartOptions = (chatId) => {
         reply_markup: {
             inline_keyboard: [
                 [
-                    { text: '🛒 Checkout', callback_data: 'checkout' },
-                    { text: '🛍️ Continue Shopping', callback_data: 'continue' },
+                    { text: '🛒 မှာယူမည်', callback_data: 'checkout' },
+                    { text: '🛍️ ဆက်ဝယ်မည်', callback_data: 'continue' },
                 ],
             ],
         },
     }
-    bot.sendMessage(chatId, 'Would you like to continue shopping or proceed to checkout?', options)
+    bot.sendMessage(chatId, 'ဆက်လက်ဝယ်ယူလိုပါသလား သို့မဟုတ် မှာယူလိုပါသလား ❓', options)
+}
+
+const mainMenuOptions = () => {
+    const options = {
+        reply_markup: {
+            inline_keyboard: [[{ text: '🔰 ပြန်စမည်', callback_data: 'restart' }]],
+        },
+    }
+    return options
 }
 
 // Process user's message according to the current state
@@ -101,59 +114,56 @@ const processMessage = (msg) => {
     const chatId = msg.chat.id
     const text = msg.text.toLowerCase()
     if (!userStates[chatId]) {
-        setUserState(chatId, 'SELECTING_SHOP')
+        setUserState(chatId, 'SELECT_SHOP')
     }
     const { state, selectedShop, selectedCategory, selectedProduct } = userStates[chatId]
+    console.info('Process on message ', state, selectedShop, selectedCategory, selectedProduct)
 
     switch (state) {
-        case 'SELECTING_SHOP': {
+        case 'SELECT_SHOP': {
             const shopIndex = parseInt(text) - 1
             if (shopIndex >= 0 && shopIndex < shops.length) {
                 const shop = shops[shopIndex]
-                setUserState(chatId, 'SELECTING_CATEGORY', { selectedShop: shop })
+                setUserState(chatId, 'SELECT_CATEGORY', { selectedShop: shop })
                 showCategoryMenu(chatId, shop)
             } else {
-                bot.sendMessage(chatId, 'Invalid shop. Please select a valid shop number.')
+                bot.sendMessage(chatId, '🔘 ကျေးဇူးပြု၍ ဖော်ပြထားသော ဆိုင်နံပါတ်ကို ရွေးချယ်ပါ။ (eg. 1)')
             }
             break
         }
 
-        case 'SELECTING_CATEGORY': {
+        case 'SELECT_CATEGORY': {
             const categoryIndex = parseInt(text) - 1
             if (selectedShop && categoryIndex >= 0 && categoryIndex < selectedShop.categories.length) {
                 const category = selectedShop.categories[categoryIndex]
-                setUserState(chatId, 'SELECTING_PRODUCT', {
-                    selectedCategory: category,
-                })
+                setUserState(chatId, 'SELECT_PRODUCT', { selectedCategory: category })
                 showProducts(chatId, category)
             } else {
-                bot.sendMessage(chatId, 'Invalid category. Please select a valid category number.')
+                bot.sendMessage(chatId, '🔘 ကျေးဇူးပြု၍  ဖော်ပြထားသော အမျိုးအစားနံပါတ်ကို ရွေးချယ်ပါ။ (eg. 1)')
             }
             break
         }
 
-        case 'SELECTING_PRODUCT': {
+        case 'SELECT_PRODUCT': {
             const productIndex = parseInt(text) - 1
             if (selectedCategory && productIndex >= 0 && productIndex < selectedCategory.items.length) {
                 const product = selectedCategory.items[productIndex]
-                setUserState(chatId, 'ADDING_TO_CART', { selectedProduct: product })
+                setUserState(chatId, 'ADD_TO_CART', { selectedProduct: product })
                 showProductDetails(chatId, product)
             } else {
-                bot.sendMessage(chatId, 'Invalid product. Please select a valid product number.')
+                bot.sendMessage(chatId, '🔘 ကျေးဇူးပြု၍  ဖော်ပြထားသော အမျိုးအမည်နံပါတ်ကို ရွေးချယ်ပါ။ (eg. 1)')
             }
             break
         }
 
-        case 'ADDING_TO_CART': {
+        case 'ADD_TO_CART': {
             const quantity = parseInt(text)
             if (!isNaN(quantity) && quantity > 0) {
                 addToCart(chatId, selectedProduct, quantity)
-                bot.sendMessage(chatId, `${quantity} x ${selectedProduct.name} added to your cart.`)
-
+                bot.sendMessage(chatId, `✅ ${quantity} x ${selectedProduct.name} စျေးခြင်းတောင်းထဲ ထည့်လိုက်ပါပြီ။`)
                 showCartOptions(chatId)
-                setUserState(chatId, 'AFTER_ADDING_TO_CART')
             } else {
-                bot.sendMessage(chatId, 'Please enter a valid quantity.')
+                bot.sendMessage(chatId, '🔘 ကျေးဇူးပြု၍ မှန်ကန်သော ပမာဏကို ထည့်ပါ။ (eg. 1)')
             }
             break
         }
@@ -162,30 +172,31 @@ const processMessage = (msg) => {
             const cart = userCarts[chatId]
             const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
             const orderSummary = cart
-                .map((item) => `◽ ${item.name} x ${item.quantity} is ${item.price * item.quantity} Baht`)
+                .map((item) => ` ◽ ${item.name} x ${item.quantity} - ${item.price * item.quantity} ဘတ်`)
                 .join('\n')
-            const fullSummary = `🧾 *New Order*\n\n🙍 User ID: ${chatId}\n\n${orderSummary}\n\n💰 *Total*: ${total} Baht`
+
+            const receiverMsg = `📣 ${chatId} ထံမှ အမှာစာ လက်ခံရရှိပါတယ်။\n\n${orderSummary}\n\n💰 **စုစုပေါင်း** - ${total} ဘတ်`
             const receiverId = selectedShop.receiverId
-            bot.sendMessage(receiverId, escapeMarkdownV2(fullSummary), { parse_mode: 'MarkdownV2' })
+            bot.sendMessage(receiverId, escapeMarkdownV2(receiverMsg), { parse_mode: 'MarkdownV2' })
                 .then(() => {
-                    bot.sendMessage(
-                        chatId,
-                        `Your order has been sent to ${selectedShop.name} for processing. Your total is ${total} Baht.`,
-                        { parse_mode: 'Markdown' }
-                    )
+                    const confirmedMsg = `🤗🎉 အမှာစာကို ${selectedShop?.name} ဆီသို့ ပေးပို့လိုက်ပါပြီ။ မှာယူသုံးဆောင်မှုအတွက် အထူးကျေးဇူးတင်ပါတယ်။\n\n${orderSummary}\n\n💰 **စုစုပေါင်း** - ${total} ဘတ်`
+                    bot.sendMessage(chatId, escapeMarkdownV2(confirmedMsg), {
+                        parse_mode: 'MarkdownV2',
+                        ...mainMenuOptions(),
+                    })
+                    setUserState(chatId, 'SELECT_SHOP')
                     userCarts[chatId] = []
-                    setUserState(chatId, 'SELECTING_SHOP')
-                    showShopMenu(chatId)
                 })
                 .catch((err) => {
-                    bot.sendMessage(chatId, 'There was an error sending your order. Please try again.')
-                    console.error(err)
+                    const warningMsg =
+                        '☢️ သင့်မှာယူမှုကို ပေးပို့ရာတွင် အမှားအယွင်းရှိနေတယ်။ ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ။'
+                    bot.sendMessage(chatId, warningMsg)
                 })
             break
         }
 
         default: {
-            setUserState(chatId, 'SELECTING_SHOP')
+            setUserState(chatId, 'SELECT_SHOP')
             showShopMenu(chatId)
         }
     }
@@ -194,7 +205,7 @@ const processMessage = (msg) => {
 // Handle the /start command
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id
-    setUserState(chatId, 'SELECTING_SHOP') // Reset the state for a new order
+    setUserState(chatId, 'SELECT_SHOP')
     showShopMenu(chatId)
 })
 
@@ -208,24 +219,36 @@ bot.onText(/\/register_owner/, (msg) => {
     const chatId = msg.chat.id
     const username = msg.chat.username || msg.chat.first_name
     ownerChatIds[username] = chatId
-    bot.sendMessage(chatId, `You are now registered as an owner. Your chat ID is ${chatId}.`)
+    bot.sendMessage(chatId, `သင်သည် ယခုအခါ ပိုင်ရှင်အဖြစ် မှတ်ပုံတင်ထားပြီးပါပြီ။ သင့် ID သည် ${chatId} ဖြစ်ပါတယ်။`)
 })
 
 // Handle user responses from inline keyboard buttons
 bot.on('callback_query', (callbackQuery) => {
+    const data = callbackQuery.data
     const message = callbackQuery.message
     const chatId = message.chat.id
-    const data = callbackQuery.data
-
     const { selectedShop } = userStates[chatId]
 
-    if (data === 'checkout') {
-        setUserState(chatId, 'CHECKOUT')
-        showCartSummary(chatId)
-    } else if (data === 'continue') {
-        setUserState(chatId, 'SELECTING_CATEGORY')
-        showCategoryMenu(chatId, selectedShop)
+    switch (data) {
+        case 'restart':
+            setUserState(chatId, 'SELECT_SHOP')
+            showShopMenu(chatId)
+            break
+
+        case 'checkout':
+            setUserState(chatId, 'CHECKOUT')
+            processMessage(message)
+            break
+
+        case 'continue':
+            setUserState(chatId, 'SELECT_CATEGORY')
+            showCategoryMenu(chatId, selectedShop)
+            break
+
+        default:
+            break
     }
+
     // Acknowledge the button press (important to prevent a hanging callback)
     bot.answerCallbackQuery(callbackQuery.id)
 })

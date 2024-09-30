@@ -1,11 +1,12 @@
 {
-  "name": "wushuwar",
+  "name": "Food Kapi Bot",
   "version": "1.0.0",
-  "description": "all in one lucky",
-  "main": "main.js",
+  "description": "🤖😋 Telegram bot integration for quick food ordering service",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon main.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",

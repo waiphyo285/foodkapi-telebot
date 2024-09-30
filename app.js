@@ -5,14 +5,13 @@ const morgan = require("morgan");
 const resmaker = require("express-resmaker").default;
 
 // Socket started
-require("./socket");
+// require("./socket");
 
 // Scheduler running
-require("./scheduler");
+// require("./scheduler");
 
 const app = express();
 const PORT = process.env.APP_PORT || 5000;
-const version = process.env.API_VERSION;
 
 app.use(morgan());
 app.use(express.urlencoded());
@@ -21,7 +20,7 @@ app.use(resmaker);
 
 app.use(
   session({
-    secret: "my_secrect_key",
+    secret: "mi_sEcret_kie",
     saveUninitialized: true,
     resave: false,
   })
@@ -42,9 +41,9 @@ const authRouter = require("./routes/auth.routes");
 const liveRouter = require("./routes/daily.live.routes");
 const resultRouter = require("./routes/result.routes");
 
-app.use(version + "/generate", authRouter);
-app.use(version + "/live", liveRouter);
-app.use(version + "/result", resultRouter);
+app.use("/v1/generate", authRouter);
+app.use("/v1/live", liveRouter);
+app.use("/v1/result", resultRouter);
 
 app.listen(PORT, () => {
   console.log(`Server  : 🚀 Listening on port ` + PORT);

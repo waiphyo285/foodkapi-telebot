@@ -1,8 +1,8 @@
-const express = require("express");
-const resultController = require("../controllers/result.controller");
+const express = require('express')
+const resultController = require('../controllers/result.controller')
 
-const router = express.Router();
+const router = express.Router()
 
-router.get("/", resultController.getResult);
+router.get('/', resultController.getResult)
 
-module.exports = router;
+module.exports = router

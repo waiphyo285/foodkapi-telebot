@@ -1,0 +1,124 @@
+{
+    "shops": [
+        {
+            "name": "Pizza Shop",
+            "receiverId": "RECEIVER_TELEGRAM_ID_PIZZA",
+            "categories": [
+                {
+                    "name": "Pizzas",
+                    "items": [
+                        {
+                            "name": "Margherita Pizza",
+                            "description": "Classic pizza with mozzarella cheese and tomato sauce.",
+                            "price": 10,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        },
+                        {
+                            "name": "Pepperoni Pizza",
+                            "description": "Pizza topped with spicy pepperoni and mozzarella cheese.",
+                            "price": 12,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        }
+                    ]
+                },
+                {
+                    "name": "Sides",
+                    "items": [
+                        {
+                            "name": "Garlic Bread",
+                            "description": "Toasted bread with garlic and butter.",
+                            "price": 5,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        },
+                        {
+                            "name": "Chicken Wings",
+                            "description": "Spicy chicken wings served with ranch sauce.",
+                            "price": 8,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Burger Shop",
+            "receiverId": "RECEIVER_TELEGRAM_ID_BURGER",
+            "categories": [
+                {
+                    "name": "Burgers",
+                    "items": [
+                        {
+                            "name": "Cheeseburger",
+                            "description": "Juicy beef burger with cheese, lettuce, and tomato.",
+                            "price": 9,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        },
+                        {
+                            "name": "Veggie Burger",
+                            "description": "Healthy burger made with a delicious veggie patty.",
+                            "price": 8,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        }
+                    ]
+                },
+                {
+                    "name": "Fries",
+                    "items": [
+                        {
+                            "name": "French Fries",
+                            "description": "Crispy fried potatoes.",
+                            "price": 3,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        },
+                        {
+                            "name": "Onion Rings",
+                            "description": "Crispy onion rings served with dipping sauce.",
+                            "price": 4,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Sushi Shop",
+            "receiverId": "RECEIVER_TELEGRAM_ID_SUSHI",
+            "categories": [
+                {
+                    "name": "Sushi Rolls",
+                    "items": [
+                        {
+                            "name": "California Roll",
+                            "description": "Delicious sushi roll with crab, avocado, and cucumber.",
+                            "price": 10,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        },
+                        {
+                            "name": "Spicy Tuna Roll",
+                            "description": "Spicy tuna sushi roll topped with avocado.",
+                            "price": 12,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        }
+                    ]
+                },
+                {
+                    "name": "Sashimi",
+                    "items": [
+                        {
+                            "name": "Salmon Sashimi",
+                            "description": "Fresh salmon slices served with soy sauce.",
+                            "price": 15,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        },
+                        {
+                            "name": "Tuna Sashimi",
+                            "description": "Fresh tuna slices served with wasabi.",
+                            "price": 15,
+                            "image_url": "https://hyperpos.neohubasia.com/uploads/products/hyper-pos-1719909711384.jpeg"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

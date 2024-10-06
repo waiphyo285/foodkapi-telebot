@@ -17,7 +17,7 @@ const user = config.MONGO_USER || 'root'
 const pass = config.MONGO_PASS || 'no-pass'
 const dbName = config.DATABASE_NAME || 'no_db'
 
-let connect_urls = {
+let connectionUrls = {
     development: `mongodb://${host}:${port}/${dbName}`,
     production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?directConnection=true&serverSelectionTimeoutMS=2000&authSource=${dbName}&appName=mongosh+2.1.1`,
     // production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?authSource=admin`,
@@ -25,7 +25,9 @@ let connect_urls = {
 
 // Create connection
 const dbConnect = async () => {
-    await mongoose.connect(connect_urls[env])
+    const dbUrl = connectionUrls[env]
+    console.info(`Creating database connection to ${dbUrl}`)
+    await mongoose.connect(dbUrl)
 }
 
 // Remove connection

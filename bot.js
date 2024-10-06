@@ -29,7 +29,7 @@ const initializeCart = (chatId) => {
 // Send a list of shops for the user to choose from
 const showShopMenu = (chatId) => {
     const shopList = shops.map((shop, index) => `${index + 1}. ${shop.name}`).join('\n')
-    const message = `🔘 Food Kapi မှ ကြိုဆိုပါတယ် အော်ဒါမှာယူရန် ဆိုင်ကိုရွေးချယ်ပါ။ (eg. 1)\n\n${shopList}`
+    const message = `🍭🤖 Food Kapi မှ ကြိုဆိုပါတယ် အော်ဒါမှာယူရန် ဆိုင်ကိုရွေးချယ်ပါ။ (eg. 1)\n\n${shopList}`
     bot.sendMessage(chatId, message)
 }
 
@@ -45,7 +45,7 @@ const showProducts = (chatId, category) => {
     const products = category.items
         .map((item, index) => `${index + 1}. ${item.name}: ${item.price} ဘတ်\n   ${item.description}`)
         .join('\n')
-    const message = `✅ *${category.name}* ကို ရွေးချယ်ထားပါတယ်။ ရရှိနိုင်သော အမျိုးအမည်များကို ဆက်လက်ကြည့်ပါ။\n\n${products}\n\nကျေးဇူးပြု၍ အမျိုးအမည်တခုကို ရွေးချယ်ပါ။ (eg. 1)`
+    const message = `🎨 *${category.name}* ကို ရွေးချယ်ထားပါတယ်။ ရရှိနိုင်သော အမျိုးအမည်များကို ဆက်လက်ကြည့်ပါ။\n\n${products}\n\nကျေးဇူးပြု၍ အမျိုးအမည်တခုကို ရွေးချယ်ပါ။ (eg. 1)`
     bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
 }
 
@@ -105,9 +105,11 @@ const showCartOptions = () => {
         reply_markup: {
             inline_keyboard: [
                 [
-                    { text: '❌ ပယ်ဖျက်မည်', callback_data: 'empty_cart' },
-                    { text: '▶️ ဆက်ဝယ်မည်', callback_data: 'continue' },
-                    { text: '👀 ကြည့်မည်', callback_data: 'view_cart' },
+                    { text: '⛔ ပယ်ဖျက်မည်', callback_data: 'empty_cart' },
+                    { text: '👁️ ကြည့်မည်', callback_data: 'view_cart' },
+                ],
+                [
+                    { text: '↩️ ဆက်ဝယ်မည်', callback_data: 'continue' },
                     { text: '🛍️ မှာယူမည်', callback_data: 'checkout' },
                 ],
             ],
@@ -143,7 +145,7 @@ const processMessage = async (msg) => {
                 setUserState(chatId, 'SELECT_CATEGORY', { selectedShop: shop })
                 showCategoryMenu(chatId, shop)
             } else {
-                bot.sendMessage(chatId, '🔘 ကျေးဇူးပြု၍ ဖော်ပြထားသော ဆိုင်နံပါတ်ကို ရွေးချယ်ပါ။ (eg. 1)')
+                bot.sendMessage(chatId, '🔥 ကျေးဇူးပြု၍ ဖော်ပြထားသော ဆိုင်နံပါတ်ကို ရွေးချယ်ပါ။ (eg. 1)')
             }
             break
         }
@@ -155,7 +157,7 @@ const processMessage = async (msg) => {
                 setUserState(chatId, 'SELECT_PRODUCT', { selectedCategory: category })
                 showProducts(chatId, category)
             } else {
-                bot.sendMessage(chatId, '🔘 ကျေးဇူးပြု၍  ဖော်ပြထားသော အမျိုးအစားနံပါတ်ကို ရွေးချယ်ပါ။ (eg. 1)')
+                bot.sendMessage(chatId, '🔥 ကျေးဇူးပြု၍  ဖော်ပြထားသော အမျိုးအစားနံပါတ်ကို ရွေးချယ်ပါ။ (eg. 1)')
             }
             break
         }
@@ -167,7 +169,7 @@ const processMessage = async (msg) => {
                 setUserState(chatId, 'ADD_TO_CART', { selectedProduct: product })
                 showProductDetails(chatId, product)
             } else {
-                bot.sendMessage(chatId, '🔘 ကျေးဇူးပြု၍  ဖော်ပြထားသော အမျိုးအမည်နံပါတ်ကို ရွေးချယ်ပါ။ (eg. 1)')
+                bot.sendMessage(chatId, '🔥 ကျေးဇူးပြု၍  ဖော်ပြထားသော အမျိုးအမည်နံပါတ်ကို ရွေးချယ်ပါ။ (eg. 1)')
             }
             break
         }
@@ -179,7 +181,7 @@ const processMessage = async (msg) => {
                 bot.sendMessage(chatId, `✅ ${quantity} x ${selectedProduct.name} စျေးခြင်းတောင်းထဲ ထည့်လိုက်ပါပြီ။`)
                 bot.sendMessage(chatId, 'ဆက်လက်ဝယ်ယူလိုပါသလား သို့မဟုတ် မှာယူလိုပါသလား ❓', showCartOptions())
             } else {
-                bot.sendMessage(chatId, '🔘 ကျေးဇူးပြု၍ မှန်ကန်သော ပမာဏကို ထည့်ပါ။ (eg. 1)')
+                bot.sendMessage(chatId, '🔥 ကျေးဇူးပြု၍ မှန်ကန်သော ပမာဏကို ထည့်ပါ။ (eg. 1)')
             }
             break
         }
@@ -210,7 +212,7 @@ const processMessage = async (msg) => {
                     userCarts[chatId] = []
                 })
                 .catch((err) => {
-                    const warningMsg = `☢️ သင့်မှာယူမှုကို ပေးပို့ရာတွင် အမှားအယွင်းရှိနေတယ်။ ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ။`
+                    const warningMsg = `❌ သင့်မှာယူမှုကို ပေးပို့ရာတွင် အမှားအယွင်းရှိနေတယ်။ ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ။`
                     bot.sendMessage(chatId, warningMsg)
                 })
 

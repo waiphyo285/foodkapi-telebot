@@ -1,7 +1,7 @@
 const owners = require('../_mockdata/owners.json')
 const { authenticateUser } = require('../services/auth.service')
 
-async function login(req, res) {
+const login = async (req, res) => {
     try {
         const hashKey = req.header('wushuwar')
         const ownerCode = req.body.owner_code

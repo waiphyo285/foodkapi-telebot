@@ -45,7 +45,7 @@ const showProducts = (chatId, category) => {
     const products = category.items
         .map((item, index) => `${index + 1}. ${item.name}: ${item.price} ဘတ်\n   ${item.description}`)
         .join('\n')
-    const message = `✅ *${category.name}*ကို ရွေးချယ်ထားပါတယ်။ ရရှိနိုင်သော အမျိုးအမည်များကို ဆက်လက်ကြည့်ပါ။\n\n${products}\n\nကျေးဇူးပြု၍ အမျိုးအမည်တခုကို ရွေးချယ်ပါ။ (eg. 1)`
+    const message = `✅ *${category.name}* ကို ရွေးချယ်ထားပါတယ်။ ရရှိနိုင်သော အမျိုးအမည်များကို ဆက်လက်ကြည့်ပါ။\n\n${products}\n\nကျေးဇူးပြု၍ အမျိုးအမည်တခုကို ရွေးချယ်ပါ။ (eg. 1)`
     bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
 }
 
@@ -75,7 +75,7 @@ const showCartSummary = (chatId) => {
     const cart = userCarts[chatId]
 
     if (cart.length === 0) {
-        bot.sendMessage(chatId, '☢️ ရွေးချယ်ထားခြင်း မရှိသေးပါ။')
+        bot.sendMessage(chatId, '☢️ ကျေးဇူးပြု၍ စျေးခြင်းတောင်းထဲသို့ ပစ္စည်းများထည့်ပါ။')
         return
     }
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -83,26 +83,24 @@ const showCartSummary = (chatId) => {
         .map((item) => ` ◽ ${item.name} x ${item.quantity} - ${item.price * item.quantity} ဘတ်`)
         .join('\n')
 
-    const message = `🔖 **အကျဉ်းချုပ်**\n\n${summary}\n\n💰 စုစုပေါင်း ${total} ဘတ်`
-
-    bot.sendMessage(chatId, escapeMarkdownV2(message), {
-        parse_mode: 'MarkdownV2',
-    })
+    const message = `🔖 **အကျဉ်းချုပ်**\n\n${summary}\n\n💰 စုစုပေါင်း ${total} ဘတ် \n\n ဆက်လက်ဝယ်ယူလိုပါသလား သို့မဟုတ် မှာယူလိုပါသလား ❓`
+    bot.sendMessage(chatId, escapeMarkdownV2(message), { parse_mode: 'MarkdownV2', ...showCartOptions() })
 }
 
 // Helper function to display buttons for checkout or continue shopping
-const showCartOptions = (chatId) => {
+const showCartOptions = () => {
     const options = {
         reply_markup: {
             inline_keyboard: [
                 [
-                    { text: '🛒 မှာယူမည်', callback_data: 'checkout' },
-                    { text: '🛍️ ဆက်ဝယ်မည်', callback_data: 'continue' },
+                    { text: '🛒 ဆက်ဝယ်မည်', callback_data: 'continue' },
+                    { text: '🛒 ကြည့်မည်', callback_data: 'view_cart' },
+                    { text: '🛍️ မှာယူမည်', callback_data: 'checkout' },
                 ],
             ],
         },
     }
-    bot.sendMessage(chatId, 'ဆက်လက်ဝယ်ယူလိုပါသလား သို့မဟုတ် မှာယူလိုပါသလား ❓', options)
+    return options
 }
 
 const mainMenuOptions = () => {
@@ -166,7 +164,7 @@ const processMessage = async (msg) => {
             if (!isNaN(quantity) && quantity > 0) {
                 addToCart(chatId, selectedProduct, quantity)
                 bot.sendMessage(chatId, `✅ ${quantity} x ${selectedProduct.name} စျေးခြင်းတောင်းထဲ ထည့်လိုက်ပါပြီ။`)
-                showCartOptions(chatId)
+                bot.sendMessage(chatId, 'ဆက်လက်ဝယ်ယူလိုပါသလား သို့မဟုတ် မှာယူလိုပါသလား ❓', showCartOptions())
             } else {
                 bot.sendMessage(chatId, '🔘 ကျေးဇူးပြု၍ မှန်ကန်သော ပမာဏကို ထည့်ပါ။ (eg. 1)')
             }
@@ -183,11 +181,16 @@ const processMessage = async (msg) => {
             const receiverMsg = `📣 ${chatId} ထံမှ အမှာစာ လက်ခံရရှိပါတယ်။\n\n${orderSummary}\n\n💰 **စုစုပေါင်း** - ${total} ဘတ်`
             const receiverId = selectedShop.receiverId
 
+            let orderRes
+
             await foodOderRepo
                 .create(createOrderPayload(selectedShop, msg, cart))
-                .then(() => bot.sendMessage(receiverId, escapeMarkdownV2(receiverMsg), { parse_mode: 'MarkdownV2' }))
+                .then((response) => {
+                    orderRes = response
+                    return bot.sendMessage(receiverId, escapeMarkdownV2(receiverMsg), { parse_mode: 'MarkdownV2' })
+                })
                 .then(() => {
-                    const confirmedMsg = `🤗🎉 အမှာစာကို ${selectedShop?.name} ဆီသို့ ပေးပို့လိုက်ပါပြီ။ မှာယူသုံးဆောင်မှုအတွက် အထူးကျေးဇူးတင်ပါတယ်။\n\n${orderSummary}\n\n💰 **စုစုပေါင်း** - ${total} ဘတ်`
+                    const confirmedMsg = `🤗🎉 အမှာစာ(#${orderRes.code}) ကို ${selectedShop?.name} ဆီသို့ ပေးပို့လိုက်ပါပြီ။ မှာယူသုံးဆောင်မှုအတွက် အထူးကျေးဇူးတင်ပါတယ်။\n\n${orderSummary}\n\n💰 **စုစုပေါင်း** - ${total} ဘတ်`
                     const msgOptions = { parse_mode: 'MarkdownV2', ...mainMenuOptions() }
                     bot.sendMessage(chatId, escapeMarkdownV2(confirmedMsg), msgOptions)
                     setUserState(chatId, 'SELECT_SHOP')
@@ -241,14 +244,18 @@ bot.on('callback_query', (callbackQuery) => {
             showShopMenu(chatId)
             break
 
-        case 'checkout':
-            setUserState(chatId, 'CHECKOUT')
-            processMessage(message)
+        case 'view_cart':
+            showCartSummary(chatId)
             break
 
         case 'continue':
             setUserState(chatId, 'SELECT_CATEGORY')
             showCategoryMenu(chatId, selectedShop)
+            break
+
+        case 'checkout':
+            setUserState(chatId, 'CHECKOUT')
+            processMessage(message)
             break
 
         default:

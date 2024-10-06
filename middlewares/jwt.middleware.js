@@ -3,22 +3,21 @@ const crypto = require('crypto')
 
 const verifyToken = async (req, res, next) => {
     const token = req.header('Authorization')
-    const securehash = req.header('Securehash')
+    const secureHash = req.header('Securehash')
+    const hashKey = process.env.HASH_KEY
 
-    if (!token || !securehash) {
+    if (!token || !secureHash) {
         return res.unauthorized('Access denied!')
     }
 
-    const hashKey = process.env.HASH_KEY
-    const tokenonly = token.split(' ')
-
-    const tokenHashed = crypto.createHash('md5').update(`${tokenonly[1]}${hashKey}`).digest('hex')
+    const phases = token.split(' ')
+    const tokenHashed = crypto.createHash('md5').update(`${phases[1]}${hashKey}`).digest('hex')
 
     try {
-        if (tokenHashed == securehash) {
+        if (tokenHashed == secureHash) {
             const KEY = process.env.AUTH_KEY
-            const decoded = jwt.verify(tokenonly[1], KEY)
-            req.userId = decoded.userId
+            const decoded = jwt.verify(phases[1], KEY)
+            // req.userId = decoded.userId
             return next()
         }
         return res.unauthorized('Access denied!')

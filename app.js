@@ -4,7 +4,6 @@ const session = require('express-session')
 const morgan = require('morgan')
 const resmaker = require('express-resmaker').default
 const indexRouter = require('./routes/index.route')
-const { verifyToken } = require('./middlewares/jwt.middleware')
 
 // Socket started
 // require("./socket");

@@ -1,5 +1,6 @@
 const OrderModel = require('../models/food-order.schema')
 const CommonRepository = require('../repositories/common.repo')
+const { showOrderConfirmation } = require('../bot')
 
 const orderRepository = new CommonRepository(OrderModel)
 
@@ -44,6 +45,7 @@ const updateOrder = async (req, res) => {
         const orderId = req.params.id
         const updateData = req.body
         const updatedOrder = await orderRepository.update(orderId, updateData)
+        await showOrderConfirmation(updatedOrder) // from bot to user (customer)
         res.success(updatedOrder)
     } catch (error) {
         res.serverError(error?.message || 'Something went wrong')

@@ -30,3 +30,18 @@ utils.createOrderPayload = (shop, msg, orderCart) => {
         total_amount: totalAmount,
     }
 }
+
+utils.getOrderStatus = (status) => {
+    switch (status) {
+        case 'pending':
+            return 'လက်ခံရန် စောင့်ဆိုင်းနေပါပြီ ⏰။'
+        case 'accepted':
+            return 'လက်ခံရရှိပါပြီ ✅။'
+        case 'completed':
+            return 'အောင်မြင်စွာ ပို့ဆောင်ပြီးပါပြီ ✅။'
+        case 'canceled':
+            return 'အမှာစာ လက်မခံနိုင်ပါ ❌။'
+        default:
+            return 'မသိသေးပါ။'
+    }
+}

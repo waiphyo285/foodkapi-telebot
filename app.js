@@ -3,6 +3,8 @@ const express = require('express')
 const session = require('express-session')
 const morgan = require('morgan')
 const resmaker = require('express-resmaker').default
+const indexRouter = require('./routes/index.route')
+const { verifyToken } = require('./middlewares/jwt.middleware')
 
 // Socket started
 // require("./socket");
@@ -11,7 +13,7 @@ const resmaker = require('express-resmaker').default
 // require("./scheduler");
 
 // Telegram bot
-require('./services/tlbot.service')
+require('./bot')
 
 const app = express()
 const PORT = process.env.APP_PORT || 5000
@@ -35,18 +37,9 @@ app.use((req, res, next) => {
     next()
 })
 
-//use public
+// use public
 app.use(express.static('public'))
-
-const verifyToken = require('./middlewares/verify.token')
-
-const authRouter = require('./routes/auth.routes')
-const liveRouter = require('./routes/daily.live.routes')
-const resultRouter = require('./routes/result.routes')
-
-app.use('/v1/generate', authRouter)
-app.use('/v1/live', liveRouter)
-app.use('/v1/result', resultRouter)
+app.use('/api', indexRouter)
 
 app.listen(PORT, () => {
     console.log(`Server  : 🚀 Listening on port ` + PORT)

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 
-async function verifyToken(req, res, next) {
+const verifyToken = async (req, res, next) => {
     const token = req.header('Authorization')
     const securehash = req.header('Securehash')
 
@@ -9,7 +9,7 @@ async function verifyToken(req, res, next) {
         return res.unauthorized('Access denied!')
     }
 
-    const hashKey = process.env.SECUREHASH
+    const hashKey = process.env.HASH_KEY
     const tokenonly = token.split(' ')
 
     const tokenHashed = crypto.createHash('md5').update(`${tokenonly[1]}${hashKey}`).digest('hex')
@@ -27,4 +27,4 @@ async function verifyToken(req, res, next) {
     }
 }
 
-module.exports = verifyToken
+module.exports = { verifyToken }

@@ -1,10 +1,16 @@
+const owners = require('../_mockdata/owners.json')
 const { authenticateUser } = require('../services/auth.service')
 
 async function login(req, res) {
     try {
         const hashKey = req.header('wushuwar')
-        const result = await authenticateUser(hashKey)
-        return result ? res.success(result) : res.unauthorized('Authentication failed')
+        const ownerCode = req.body.owner_code
+
+        const owner = owners.find((o) => o.code === ownerCode)
+        if (!owner) return res.unauthorized('Invalid owner code')
+
+        const token = await authenticateUser(hashKey)
+        return token ? res.success({ ...owner, token }) : res.unauthorized('Authentication failed')
     } catch (error) {
         res.serverError('Something went wrong')
     }

@@ -1,12 +1,17 @@
 const TelegramBot = require('node-telegram-bot-api')
-const products = require('../_mockdata/products.json')
+const CommonRepo = require('./repositories/common.repo')
+const foodOrderModel = require('./models/food-order.schema')
+const shops = require('./_mockdata/shops.json')
+const { escapeMarkdownV2, createOrderPayload } = require('./utils')
 
 const botToken = process.env.TG_BOT_TOKEN
 const bot = new TelegramBot(botToken, { polling: true })
 
-const shops = products.shops
-const userStates = {} // Store the state of the user's selection
-const userCarts = {} // Store the user's cart (products and quantities)
+// Initialize repositories
+const foodOderRepo = new CommonRepo(foodOrderModel)
+
+const userStates = {}
+const userCarts = {}
 
 // Helper to set user state
 const setUserState = (chatId, state, data = {}) => {
@@ -110,7 +115,7 @@ const mainMenuOptions = () => {
 }
 
 // Process user's message according to the current state
-const processMessage = (msg) => {
+const processMessage = async (msg) => {
     const chatId = msg.chat.id
     const text = msg.text.toLowerCase()
     if (!userStates[chatId]) {
@@ -177,21 +182,22 @@ const processMessage = (msg) => {
 
             const receiverMsg = `📣 ${chatId} ထံမှ အမှာစာ လက်ခံရရှိပါတယ်။\n\n${orderSummary}\n\n💰 **စုစုပေါင်း** - ${total} ဘတ်`
             const receiverId = selectedShop.receiverId
-            bot.sendMessage(receiverId, escapeMarkdownV2(receiverMsg), { parse_mode: 'MarkdownV2' })
+
+            await foodOderRepo
+                .create(createOrderPayload(selectedShop, msg, cart))
+                .then(() => bot.sendMessage(receiverId, escapeMarkdownV2(receiverMsg), { parse_mode: 'MarkdownV2' }))
                 .then(() => {
                     const confirmedMsg = `🤗🎉 အမှာစာကို ${selectedShop?.name} ဆီသို့ ပေးပို့လိုက်ပါပြီ။ မှာယူသုံးဆောင်မှုအတွက် အထူးကျေးဇူးတင်ပါတယ်။\n\n${orderSummary}\n\n💰 **စုစုပေါင်း** - ${total} ဘတ်`
-                    bot.sendMessage(chatId, escapeMarkdownV2(confirmedMsg), {
-                        parse_mode: 'MarkdownV2',
-                        ...mainMenuOptions(),
-                    })
+                    const msgOptions = { parse_mode: 'MarkdownV2', ...mainMenuOptions() }
+                    bot.sendMessage(chatId, escapeMarkdownV2(confirmedMsg), msgOptions)
                     setUserState(chatId, 'SELECT_SHOP')
                     userCarts[chatId] = []
                 })
                 .catch((err) => {
-                    const warningMsg =
-                        '☢️ သင့်မှာယူမှုကို ပေးပို့ရာတွင် အမှားအယွင်းရှိနေတယ်။ ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ။'
+                    const warningMsg = `☢️ သင့်မှာယူမှုကို ပေးပို့ရာတွင် အမှားအယွင်းရှိနေတယ်။ ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ။`
                     bot.sendMessage(chatId, warningMsg)
                 })
+
             break
         }
 
@@ -255,9 +261,3 @@ bot.on('callback_query', (callbackQuery) => {
 
 // Handle all other messages
 bot.on('message', processMessage)
-
-const escapeMarkdownV2 = (text) => {
-    return text
-        .replace(/([_*{}[\]()~`>#+\-|.!])/g, '\\$1') // Escape special characters
-        .replace(/(\s)/g, '\\$1') // Escape spaces
-}

@@ -7,6 +7,27 @@ const { escapeMarkdownV2, createOrderPayload, getOrderStatus } = require('./util
 const botToken = process.env.TG_BOT_TOKEN
 const bot = new TelegramBot(botToken, { polling: true })
 
+bot.setMyCommands([
+    {
+        command: '/start',
+        description: 'မှာစားမည်',
+    },
+    {
+        command: '/my_cart',
+        description: 'ကျွန်ုပ်စျေးခြင်း',
+    },
+    {
+        command: '/my_order',
+        description: 'ကျွန်ုပ်အမှာစာများ',
+    },
+    {
+        command: '/about',
+        description: 'Bot အကြောင်း',
+    },
+])
+    .then(() => console.info('Started'))
+    .catch((err) => console.error(err))
+
 // Initialize repositories
 const foodOderRepo = new CommonRepo(foodOrderModel)
 
@@ -89,14 +110,15 @@ const showCartSummary = (chatId) => {
 }
 
 // Show the order status to the user
-const showOrderConfirmation = async (order) => {
+const showOrderConfirmation = async (order, showButton = true) => {
     const receiverId = order.customer_platform_id
     const orderSummary = order.items
         .map((item) => ` ◽ ${item.name} x ${item.quantity} - ${item.price * item.quantity} ဘတ်`)
         .join('\n')
 
+    const buttons = showButton ? mainMenuOptions() : {}
     const message = `🔖 အမှာစာအမှတ်: ${order.code} အတွက် ${order.shop_name} မှ ${getOrderStatus(order.status)}\n\n${orderSummary}\n\n💰 စုစုပေါင်း ${order.total_amount} ဘတ် \n\n `
-    bot.sendMessage(receiverId, escapeMarkdownV2(message), { parse_mode: 'MarkdownV2', ...mainMenuOptions() })
+    bot.sendMessage(receiverId, escapeMarkdownV2(message), { parse_mode: 'MarkdownV2', ...buttons })
 }
 
 // Helper function to display buttons for checkout or continue shopping
@@ -214,6 +236,7 @@ const processMessage = async (msg) => {
                 .catch((err) => {
                     const warningMsg = `❌ သင့်မှာယူမှုကို ပေးပို့ရာတွင် အမှားအယွင်းရှိနေတယ်။ ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ။`
                     bot.sendMessage(chatId, warningMsg)
+                    console.error(err)
                 })
 
             break
@@ -233,17 +256,28 @@ bot.onText(/\/start/, (msg) => {
     showShopMenu(chatId)
 })
 
-// Handle the /cart command to show the current cart summary
-bot.onText(/\/cart/, (msg) => {
+// Handle the /my_cart command to show the current cart
+bot.onText(/\/my_cart/, (msg) => {
     const chatId = msg.chat.id
     showCartSummary(chatId)
 })
 
-bot.onText(/\/register_owner/, (msg) => {
+bot.onText(/\/my_order/, async (msg) => {
     const chatId = msg.chat.id
-    const username = msg.chat.username || msg.chat.first_name
-    ownerChatIds[username] = chatId
-    bot.sendMessage(chatId, `သင်သည် ယခုအခါ ပိုင်ရှင်အဖြစ် မှတ်ပုံတင်ထားပြီးပါပြီ။ သင့် ID သည် ${chatId} ဖြစ်ပါတယ်။`)
+    // showCartSummary(chatId)
+    foodOderRepo
+        .list({ customer_platform_id: chatId })
+        .then((orders) => orders.find((order) => showOrderConfirmation(order, false)))
+        .then((error) => console.error(error))
+})
+
+// Handle the /about command to show about bot
+bot.onText(/\/about/, (msg) => {
+    const chatId = msg.chat.id
+    bot.sendMessage(
+        chatId,
+        'ဤ bot လေးသည် Bank Kapi အတွင်း ရောင်းချနေသော အစားအစာများကို တနေရာတည်းမှာ မှာယူသုံးဆောင်နိုင်ရန် ရည်ရွယ်ဖန်တီးထားပါသည်။ 💙🤖'
+    )
 })
 
 // Handle user responses from inline keyboard buttons

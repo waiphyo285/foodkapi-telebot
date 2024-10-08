@@ -100,9 +100,8 @@ const showCartOptions = () => {
 
 // Show customer information
 const showCustomerInfo = async (chatId) => {
-    const customers = await customerRepo.list({ platform_id: chatId })
-    if (customers.length > 0) {
-        const customer = customers[0]
+    const customer = await customerRepo.getOneBy({ platform_id: chatId })
+    if (customer) {
         const message = `👤 ကျွန်ပ်အကြောင်း \n\n🔹 အမည် - ${customer.fullname} \n🔹 လိပ်စာ - ${customer.address || 'Not provided'} \n🔹 ဖုန်း - ${customer.phone || 'Not provided'}`
         await bot.sendMessage(chatId, message, { ...profileMenuOptions() })
     } else {
@@ -194,15 +193,12 @@ const processUser = async (msg) => {
     let customer
     let needUpdated = false
     const { id: platform_id } = msg.chat
-    const customers = await customerRepo.list({ platform_id })
+    customer = await customerRepo.getOneBy({ platform_id })
 
-    if (customers.length === 0) {
+    if (!customer) {
         const { first_name: fullname, username } = msg.chat
         customer = await customerRepo.create({ platform_id, fullname, username })
         await bot.sendMessage(platform_id, "👋 Welcome! Let's get your details to proceed with your order.")
-    } else {
-        customer = customers[0]
-        // await bot.sendMessage(platform_id, `👋 Welcome back, ${customer.fullname}! Let's continue.`)
     }
 
     if (!customer.is_verified) {

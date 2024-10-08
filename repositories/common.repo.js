@@ -27,6 +27,17 @@ class CommonRepository {
         }
     }
 
+    // Get a document by query
+    async getOneBy(query) {
+        try {
+            const documents = await this.model.find(query)
+            if (!documents) return null
+            return documents[0]
+        } catch (error) {
+            throw new Error(`Error getting document: ${error.message}`)
+        }
+    }
+
     // Update a document by ID
     async update(id, updateData) {
         try {

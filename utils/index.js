@@ -14,7 +14,7 @@ utils.generateOrderCode = (prefix = 'FKP') => {
     return `${prefix}${timestamp}${randomNum}`
 }
 
-utils.createOrderPayload = (shop, msg, orderCart) => {
+utils.createOrderPayload = (shop, customer, orderCart) => {
     const orderCode = utils.generateOrderCode()
     const totalAmount = orderCart.reduce((sum, item) => sum + item.price * item?.quantity || 0, 0)
 
@@ -22,10 +22,13 @@ utils.createOrderPayload = (shop, msg, orderCart) => {
         code: orderCode,
         shop_name: shop.name,
         shop_platform_id: shop.receiverId,
-        customer_name: faker.person.fullName(),
-        customer_phone: faker.phone.imei(),
-        customer_addr: faker.location.streetAddress(),
-        customer_platform_id: msg.chat.id,
+        // customer_name: faker.person.fullName(),
+        // customer_phone: faker.phone.imei(),
+        // customer_addr: faker.location.streetAddress(),
+        customer_name: customer.fullname,
+        customer_phone: customer.phone,
+        customer_addr: customer.address,
+        customer_platform_id: customer.platform_id,
         items: orderCart,
         total_amount: totalAmount,
     }

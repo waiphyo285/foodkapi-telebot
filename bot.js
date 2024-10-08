@@ -184,7 +184,8 @@ const showOrderConfirmation = async (order, showButton = true) => {
         .join('\n')
 
     const buttons = showButton ? mainMenuOptions() : {}
-    const message = `🔖 အမှာစာအမှတ်: ${order.code} အတွက် ${order.shop_name} မှ ${getOrderStatus(order.status)}\n\n${orderSummary}\n\n💰 စုစုပေါင်း ${order.total_amount} ဘတ် \n\n `
+    const noteMsg = '⚠️ မှတ်ချက်: အကွာအဝေးပေါ် မူတည်၍ ထပ်တောင်း ပို့ဆောင်ခ ရှိနိုင်ပါသည်။'
+    const message = `🔖 အမှာစာအမှတ်: ${order.code} အတွက် ${order.shop_name} မှ ${getOrderStatus(order.status)}\n\n${orderSummary}\n\n💰 စုစုပေါင်း ${order.total_amount} ဘတ် \n\n  ${noteMsg}`
     bot.sendMessage(receiverId, escapeMarkdownV2(message), { parse_mode: 'MarkdownV2', ...buttons })
 }
 
@@ -238,14 +239,14 @@ const processMessage = async (msg) => {
 
         if (phoneReqd && text) {
             await customerRepo.updateBy({ platform_id: chatId }, { phone: text })
-            await bot.sendMessage(chatId, '🏠 Please provide your address to proceed.')
+            await bot.sendMessage(chatId, '🏠 ကျေးဇူးပြု၍ လိပ်စာအပြည့်အစုံထည့်ပါ။')
             setUserDetail(chatId, { phoneReqd: false })
             return
         }
 
         if (addressReqd && text) {
             await customerRepo.updateBy({ platform_id: chatId }, { address: text, is_verified: true })
-            await bot.sendMessage(chatId, '🤗 Thank you for updating your information on your account.')
+            await bot.sendMessage(chatId, '🤗 အချက်အလက်များကို ပံ့ပိုးသည့်အတွက် ကျေးဇူးတင်ပါသည်။')
             setUserDetail(chatId, { addressReqd: false })
             return
         }
@@ -320,14 +321,17 @@ const processMessage = async (msg) => {
 
             let orderRes
 
+            const customer = await customerRepo.getOneBy({ platform_id: chatId })
+
             await foodOderRepo
-                .create(createOrderPayload(selectedShop, msg, cart))
+                .create(createOrderPayload(selectedShop, customer, cart))
                 .then((response) => {
                     orderRes = response
                     return bot.sendMessage(receiverId, escapeMarkdownV2(receiverMsg), { parse_mode: 'MarkdownV2' })
                 })
                 .then(() => {
-                    const confirmedMsg = `🤗🎉 အမှာစာ(#${orderRes.code}) ကို ${selectedShop?.name} ဆီသို့ ပေးပို့လိုက်ပါပြီ။ မှာယူသုံးဆောင်မှုအတွက် အထူးကျေးဇူးတင်ပါတယ်။\n\n${orderSummary}\n\n💰 စုစုပေါင်း - ${total} ဘတ်`
+                    const noteMsg = '⚠️ မှတ်ချက်: အကွာအဝေးပေါ် မူတည်၍ ထပ်တောင်း ပို့ဆောင်ခ ရှိနိုင်ပါသည်။'
+                    const confirmedMsg = `🤗🎉 အမှာစာ(#${orderRes.code}) ကို ${selectedShop?.name} ဆီသို့ ပေးပို့လိုက်ပါပြီ။ မှာယူသုံးဆောင်မှုအတွက် အထူးကျေးဇူးတင်ပါတယ်။\n\n${orderSummary}\n\n💰 စုစုပေါင်း - ${total} ဘတ် \n\n ${noteMsg}`
                     const msgOptions = { parse_mode: 'MarkdownV2', ...mainMenuOptions() }
                     bot.sendMessage(chatId, escapeMarkdownV2(confirmedMsg), msgOptions)
                     setUserState(chatId, 'SELECT_SHOP')
@@ -354,7 +358,7 @@ const handleVerifyUser = async (msg) => {
     const chatId = msg.chat.id
     const [_, needUpdated] = await processUser(msg)
     if (needUpdated) {
-        await bot.sendMessage(chatId, '📞 Please provide your phone number to proceed.')
+        await bot.sendMessage(chatId, '📞 ကျေးဇူးပြု၍ ဖုန်းနံပတ်ထည့်ပါ။')
         return false
     }
     return true

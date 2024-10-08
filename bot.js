@@ -126,7 +126,7 @@ const showCategoryMenu = (chatId, shop) => {
 // Send a list of products from selected category
 const showProducts = (chatId, category) => {
     const products = category.items
-        .map((item, index) => `${index + 1}. ${item.name}: ${item.price} ဘတ်\n   ${item.description}`)
+        .map((item, index) => `${index + 1}. ${item.name} - ${item.price} ဘတ်\n   ${item.description}`)
         .join('\n')
     const message = `🎨 *${category.name}* ကို ရွေးချယ်ထားပါတယ်။ ရရှိနိုင်သော အမျိုးအမည်များကို ဆက်လက်ကြည့်ပါ။\n\n${products}\n\nကျေးဇူးပြု၍ အမျိုးအမည်တခုကို ရွေးချယ်ပါ။ (eg. 1)`
     bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })

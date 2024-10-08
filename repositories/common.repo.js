@@ -39,6 +39,22 @@ class CommonRepository {
             throw new Error(`Error updating document: ${error.message}`)
         }
     }
+    async updateBy(query, updateData) {
+        try {
+            const updatedDocument = await this.model.findOneAndUpdate(query, updateData, {
+                new: true, // Return the updated document
+                runValidators: true, // Ensure that validation is run on the update
+            })
+
+            if (!updatedDocument) {
+                throw new Error('Document not found or update failed')
+            }
+
+            return updatedDocument
+        } catch (error) {
+            throw new Error(`Error updating document: ${error.message}`)
+        }
+    }
 
     // Delete a document by ID
     async delete(id) {

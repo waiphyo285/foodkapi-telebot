@@ -21,16 +21,20 @@ const makeSchema = new Schema({
     },
     phone: {
         type: String,
-        required: true,
+        required: false,
     },
     address: {
         type: String,
-        required: true,
+        required: false,
     },
     platform: {
         type: String,
         enum: ['telegram', 'messenger'],
         default: 'telegram',
+    },
+    is_verified: {
+        type: Boolean,
+        default: false,
     },
     created_at: {
         type: Date,

@@ -70,7 +70,7 @@ const makeSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'accepted', 'completed', 'canceled'],
+        enum: ['pending', 'accepted', 'completed', 'canceled', 'archived'],
         default: 'pending',
     },
     ordered_at: {

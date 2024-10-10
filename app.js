@@ -9,7 +9,7 @@ const indexRouter = require('./routes/index.route')
 // require("./socket");
 
 // Scheduler running
-// require("./scheduler");
+require('./scheduler')
 
 // Telegram bot
 require('./bot')

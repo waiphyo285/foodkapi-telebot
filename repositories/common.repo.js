@@ -50,11 +50,13 @@ class CommonRepository {
             throw new Error(`Error updating document: ${error.message}`)
         }
     }
+
+    // Update a document by query
     async updateBy(query, updateData) {
         try {
             const updatedDocument = await this.model.findOneAndUpdate(query, updateData, {
-                new: true, // Return the updated document
-                runValidators: true, // Ensure that validation is run on the update
+                new: true,
+                runValidators: true,
             })
 
             if (!updatedDocument) {
@@ -64,6 +66,19 @@ class CommonRepository {
             return updatedDocument
         } catch (error) {
             throw new Error(`Error updating document: ${error.message}`)
+        }
+    }
+
+    // Update multiple documents by query
+    async updateMany(query, updateData) {
+        try {
+            const updateResult = await this.model.updateMany(query, updateData, {
+                runValidators: true,
+            })
+
+            return updateResult
+        } catch (error) {
+            throw new Error(`Error updating documents: ${error.message}`)
         }
     }
 

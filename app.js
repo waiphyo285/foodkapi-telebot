@@ -20,12 +20,12 @@ const app = express()
 const ENV = process.env.NODE_ENV
 const PORT = process.env.APP_PORT || 5000
 
+console.info(`SS Url  : 🖇️ ${sessionUrls[ENV]}`)
+
 app.use(morgan('combined'))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(resmaker)
-
-console.info('Session Store Url: ', sessionUrls[ENV])
 
 app.use(
     session({

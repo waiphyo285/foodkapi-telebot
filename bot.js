@@ -8,39 +8,39 @@ const { escapeMarkdownV2, createOrderPayload, getOrderStatus } = require('./util
 const botToken = process.env.TG_BOT_TOKEN
 const bot = new TelegramBot(botToken, { polling: true })
 
-bot.setMyCommands([
-    {
-        command: '/start',
-        description: 'မှာစားမည်',
-    },
-    {
-        command: '/my_info',
-        description: 'ကျွန်ုပ်အကြောင်း',
-    },
-    {
-        command: '/my_cart',
-        description: 'ကျွန်ုပ်စျေးခြင်း',
-    },
-    {
-        command: '/my_order',
-        description: 'ကျွန်ုပ်အမှာစာများ',
-    },
-    {
-        command: '/about',
-        description: 'Bot အကြောင်း',
-    },
-])
-    .then(() => console.info('🤖 Hello everybody, I am started!'))
-    .catch((err) => console.error(err))
+// Initialize user states
+const userDetails = {}
+const userStates = {}
+const userCarts = {}
 
 // Initialize repositories
 const customerRepo = new CommonRepo(customerModel)
 const foodOderRepo = new CommonRepo(foodOrderModel)
 
-// Initialize user states
-const userDetails = {}
-const userStates = {}
-const userCarts = {}
+bot.setMyCommands([
+    {
+        command: '/start',
+        description: '🚴‍♂️ မှာစားမည်',
+    },
+    {
+        command: '/my_cart',
+        description: '🛒 ကျွန်ုပ်စျေးခြင်း',
+    },
+    {
+        command: '/my_order',
+        description: '🧾 ကျွန်ုပ်အမှာစာများ',
+    },
+    {
+        command: '/my_info',
+        description: '🧑‍🦰 ကျွန်ုပ်အကြောင်း',
+    },
+    {
+        command: '/about',
+        description: '🤖 Bot အကြောင်း',
+    },
+])
+    .then(() => console.info('🤖 Hello everybody, I am started!'))
+    .catch((err) => console.error(err))
 
 // Helper to set user details
 const setUserDetail = (chatId, data = {}) => {
@@ -58,6 +58,14 @@ const setUserState = (chatId, state, data = {}) => {
 const initializeCart = (chatId) => {
     if (!userCarts[chatId]) {
         userCarts[chatId] = []
+    }
+}
+
+const resetCart = (chatId) => {
+    if (userCarts[chatId]) {
+        userCarts[chatId] = []
+    } else {
+        initializeCart(chatId)
     }
 }
 
@@ -103,7 +111,7 @@ const showCustomerInfo = async (chatId) => {
     const customer = await customerRepo.getOneBy({ platform_id: chatId })
     if (customer) {
         const message = `👤 ကျွန်ပ်အကြောင်း \n\n🔹 အမည် - ${customer.fullname} \n🔹 လိပ်စာ - ${customer.address || 'Not provided'} \n🔹 ဖုန်း - ${customer.phone || 'Not provided'}`
-        await bot.sendMessage(chatId, message, { ...profileMenuOptions() })
+        await bot.sendMessage(chatId, message, profileMenuOptions())
     } else {
         await bot.sendMessage(chatId, '👤 ဝယ်ယူအားပေးသူ ဖြစ်ချင်ပါသလား? ကျေးဇူးပြု၍ အကောင့်ပြုလုပ်ပါ။')
     }
@@ -126,7 +134,10 @@ const showCategoryMenu = (chatId, shop) => {
 // Send a list of products from selected category
 const showProducts = (chatId, category) => {
     const products = category.items
-        .map((item, index) => `${index + 1}. ${item.name} - ${item.price} ဘတ်\n   ${item.description}`)
+        .map(
+            (item, index) =>
+                `${index + 1}. ${item.name} - ${item.price} ဘတ်  ${item.description && '\n' + item.description}`
+        )
         .join('\n')
     const message = `🎨 *${category.name}* ကို ရွေးချယ်ထားပါတယ်။ ရရှိနိုင်သော အမျိုးအမည်များကို ဆက်လက်ကြည့်ပါ။\n\n${products}\n\nကျေးဇူးပြု၍ အမျိုးအမည်တခုကို ရွေးချယ်ပါ။ (eg. 1)`
     bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
@@ -173,7 +184,10 @@ const showCartSummary = (chatId) => {
 const showOrderList = async (chatId) => {
     await foodOderRepo
         .list({ customer_platform_id: chatId, status: 'accepted' })
-        .then((orders) => orders.find((order) => showOrderConfirmation(order, false)))
+        .then((orders) => {
+            if (orders.length > 0) return orders.find((order) => showOrderConfirmation(order, false))
+            bot.sendMessage(chatId, '🧾  မှာယူထားသော အမှာစာများ မရှိသေးပါ။ ယခုပဲ မှာယူသုံးဆောင်လိုက်ပါ။')
+        })
         .then((error) => console.error(error))
 }
 // Show order status to ordered user
@@ -238,14 +252,14 @@ const processMessage = async (msg) => {
         const { phoneReqd, addressReqd } = userDetails[chatId]
 
         if (phoneReqd && text) {
-            await customerRepo.updateBy({ platform_id: chatId }, { phone: text })
+            await customerRepo.updateBy({ platform_id: chatId }, { phone: msg.text })
             await bot.sendMessage(chatId, '🏠 ကျေးဇူးပြု၍ လိပ်စာအပြည့်အစုံထည့်ပါ။')
             setUserDetail(chatId, { phoneReqd: false })
             return
         }
 
         if (addressReqd && text) {
-            await customerRepo.updateBy({ platform_id: chatId }, { address: text, is_verified: true })
+            await customerRepo.updateBy({ platform_id: chatId }, { address: msg.text, is_verified: true })
             await bot.sendMessage(chatId, '🤗 အချက်အလက်များကို ပံ့ပိုးသည့်အတွက် ကျေးဇူးတင်ပါသည်။')
             setUserDetail(chatId, { addressReqd: false })
             return
@@ -335,7 +349,7 @@ const processMessage = async (msg) => {
                     const msgOptions = { parse_mode: 'MarkdownV2', ...mainMenuOptions() }
                     bot.sendMessage(chatId, escapeMarkdownV2(confirmedMsg), msgOptions)
                     setUserState(chatId, 'SELECT_SHOP')
-                    userCarts[chatId] = []
+                    resetCart(chatId)
                 })
                 .catch((err) => {
                     const warningMsg = `❌ သင့်မှာယူမှုကို ပေးပို့ရာတွင် အမှားအယွင်းရှိနေတယ်။ ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ။`
@@ -407,11 +421,22 @@ bot.onText(/\/about/, async (msg) => {
 bot.on('message', processMessage)
 
 // Handle user responses from inline keyboard buttons
-bot.on('callback_query', (callbackQuery) => {
+bot.on('callback_query', async (callbackQuery) => {
     const data = callbackQuery.data
     const message = callbackQuery.message
     const chatId = message.chat.id
-    const { selectedShop } = userStates[chatId]
+
+    const cart = userCarts[chatId]
+    const userState = userStates[chatId]
+    const selectedShop = userState?.selectedShop
+
+    if ((cart && cart.length === 0) || !selectedShop) {
+        setUserState(chatId, 'SELECT_SHOP')
+        showShopMenu(chatId)
+        return
+    }
+
+    console.log('data', data)
 
     switch (data) {
         case 'restart':
@@ -420,7 +445,14 @@ bot.on('callback_query', (callbackQuery) => {
             break
 
         case 'edit_info':
-            // TODO: handle updating user info!
+            await customerRepo.updateBy(
+                { platform_id: chatId },
+                {
+                    phone: undefined,
+                    address: undefined,
+                }
+            )
+            await handleVerifyUser(message)
             break
 
         case 'view_cart':
@@ -428,6 +460,7 @@ bot.on('callback_query', (callbackQuery) => {
             break
 
         case 'empty_cart':
+            resetCart(chatId)
             setUserState(chatId, 'SELECT_SHOP')
             showShopMenu(chatId)
             break

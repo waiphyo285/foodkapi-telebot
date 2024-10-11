@@ -63,6 +63,8 @@ class CommonRepository {
                 throw new Error('Document not found or update failed')
             }
 
+            console.log('updated document: ' + updatedDocument)
+
             return updatedDocument
         } catch (error) {
             throw new Error(`Error updating document: ${error.message}`)

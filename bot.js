@@ -1,3 +1,4 @@
+const { faker } = require('@faker-js/faker')
 const TelegramBot = require('node-telegram-bot-api')
 const CommonRepo = require('./repositories/common.repo')
 const customerModel = require('./models/customer.schema')
@@ -212,7 +213,11 @@ const processUser = async (msg) => {
 
     if (!customer) {
         const { first_name: fullname, username } = msg.chat
-        customer = await customerRepo.create({ platform_id, fullname, username })
+        customer = await customerRepo.create({
+            platform_id,
+            username: username || 'nilusr',
+            fullname: fullname || faker.person.fullName(),
+        })
         await bot.sendMessage(platform_id, "👋 Welcome! Let's get your details to proceed with your order.")
     }
 

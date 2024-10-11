@@ -20,7 +20,7 @@ const app = express()
 const ENV = process.env.NODE_ENV
 const PORT = process.env.APP_PORT || 5000
 
-console.info(`SS Url  : 🖇️ ${sessionUrls[ENV]}`)
+console.info(`SS Url  : 🖇️  ${sessionUrls[ENV]}`)
 
 app.use(morgan('combined'))
 app.use(express.urlencoded({ extended: true }))
@@ -34,6 +34,7 @@ app.use(
         resave: false,
         store: MongoStore.create({
             mongoUrl: sessionUrls[ENV],
+            ttl: 14 * 24 * 60 * 60,
         }),
     })
 )

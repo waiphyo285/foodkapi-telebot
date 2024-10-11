@@ -20,7 +20,7 @@ const memoName = config.MEMOBASE_NAME || 'no_memo'
 
 const sessionUrls = {
     development: `mongodb://${host}:${port}/${memoName}`,
-    production: `mongodb://${user}:${pass}@${host}:${port}/${memoName}?directConnection=true&serverSelectionTimeoutMS=2000&authSource=${dbName}&appName=mongosh+2.1.1`,
+    production: `mongodb://${user}:${pass}@${host}:${port}/${memoName}?authSource=${dbName}`,
     // production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?authSource=admin`,
 }
 
@@ -33,7 +33,7 @@ const connectionUrls = {
 // Create connection
 const dbConnect = async () => {
     const dbUrl = connectionUrls[env]
-    console.info(`DB Url  : 🖇️ ${dbUrl}`)
+    console.info(`DB Url  : 🖇️  ${dbUrl}`)
     await mongoose.connect(dbUrl)
 }
 

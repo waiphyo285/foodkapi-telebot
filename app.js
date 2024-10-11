@@ -25,6 +25,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(resmaker)
 
+console.info('Session Store Url: ', sessionUrls[ENV])
+
 app.use(
     session({
         secret: 'mi_sEcret_kie',

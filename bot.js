@@ -30,7 +30,7 @@ bot.setMyCommands([
         description: 'Bot အကြောင်း',
     },
 ])
-    .then(() => console.info('🤖 I am started!'))
+    .then(() => console.info('🤖 Hello everybody, I am started!'))
     .catch((err) => console.error(err))
 
 // Initialize repositories

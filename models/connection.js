@@ -14,10 +14,17 @@ const env = config.NODE_ENV || 'development'
 const host = config.MONGO_HOST || 'localhost'
 const port = config.MONGO_PORT || 27017
 const user = config.MONGO_USER || 'root'
-const pass = config.MONGO_PASS || 'no-pass'
+const pass = config.MONGO_PASS || ''
 const dbName = config.DATABASE_NAME || 'no_db'
+const memoName = config.MEMOBASE_NAME || 'no_memo'
 
-let connectionUrls = {
+const sessionUrls = {
+    development: `mongodb://${host}:${port}/${memoName}`,
+    production: `mongodb://${user}:${pass}@${host}:${port}/${memoName}?directConnection=true&serverSelectionTimeoutMS=2000&authSource=${dbName}&appName=mongosh+2.1.1`,
+    // production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?authSource=admin`,
+}
+
+const connectionUrls = {
     development: `mongodb://${host}:${port}/${dbName}`,
     production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?directConnection=true&serverSelectionTimeoutMS=2000&authSource=${dbName}&appName=mongosh+2.1.1`,
     // production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?authSource=admin`,
@@ -26,7 +33,7 @@ let connectionUrls = {
 // Create connection
 const dbConnect = async () => {
     const dbUrl = connectionUrls[env]
-    console.info(`Creating database connection to ${dbUrl}`)
+    console.info(`DB Url  : 🖇️ ${dbUrl}`)
     await mongoose.connect(dbUrl)
 }
 
@@ -42,13 +49,13 @@ dbConnect()
 // Signal connection
 mongoose.connection
     .once('open', function () {
-        console.info(`Database: 😃 MongoDB (${env}) is connected!`)
+        console.info(`Database: 🔗 MongoDB (${env}) is connected!`)
     })
     .on('error', function (err) {
-        console.error(`Database: 😡 MongoDB connection error`, err)
+        console.error(`Database: ⛓️‍💥 MongoDB connection error`, err)
     })
     .on('disconnected', function () {
-        console.warn(`Database: 😡 MongoDB is disconnected`)
+        console.warn(`Database: ⛓️‍💥 MongoDB is disconnected`)
     })
 
-module.exports = { mongoose, dbConnect, dbDisconnect }
+module.exports = { mongoose, dbConnect, dbDisconnect, sessionUrls }

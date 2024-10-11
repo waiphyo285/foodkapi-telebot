@@ -3,7 +3,9 @@ const express = require('express')
 const session = require('express-session')
 const morgan = require('morgan')
 const resmaker = require('express-resmaker').default
+const MongoStore = require('connect-mongo')
 const indexRouter = require('./routes/index.route')
+const { sessionUrls } = require('./models/connection')
 
 // Socket started
 // require("./socket");
@@ -15,10 +17,11 @@ require('./scheduler')
 require('./bot')
 
 const app = express()
+const ENV = process.env.NODE_ENV
 const PORT = process.env.APP_PORT || 5000
 
-app.use(morgan())
-app.use(express.urlencoded())
+app.use(morgan('combined'))
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(resmaker)
 
@@ -27,6 +30,9 @@ app.use(
         secret: 'mi_sEcret_kie',
         saveUninitialized: true,
         resave: false,
+        store: MongoStore.create({
+            mongoUrl: sessionUrls[ENV],
+        }),
     })
 )
 

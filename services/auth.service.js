@@ -6,8 +6,8 @@ const authenticateUser = async (hashKey) => {
     const username = process.env.JWT_USER
     const password = process.env.JWT_PASS
 
-    const prehash = `${username}:${password}`
-    const customHash = crypto.createHash('md5').update(prehash).digest('hex')
+    const preHash = `${username}:${password}`
+    const customHash = crypto.createHash('md5').update(preHash).digest('hex')
 
     if (customHash === hashKey) {
         const token = jwt.sign({ userId: username }, KEY, { expiresIn: '24h' })

@@ -11,7 +11,7 @@ const foodOderRepo = new CommonRepo(foodOrderModel)
 // })
 
 // run the scheduler to archive uncompleted orders
-cron.schedule('0 2 * * *', async () => {
+cron.schedule('0 20 * * *', async () => {
     await foodOderRepo.updateMany({ status: 'pending' }, { status: 'archived' })
     await foodOderRepo.updateMany({ status: 'accepted' }, { status: 'archived' })
 })

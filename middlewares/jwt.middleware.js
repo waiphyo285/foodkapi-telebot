@@ -22,7 +22,7 @@ const verifyToken = async (req, res, next) => {
         }
         return res.unauthorized('Access denied!')
     } catch (error) {
-        res.serverError('Something went wrong')
+        return res.unauthorized('Access denied!')
     }
 }
 

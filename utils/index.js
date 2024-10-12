@@ -8,10 +8,42 @@ utils.escapeMarkdownV2 = (text) => {
         .replace(/(\s)/g, '\\$1') // Escape spaces
 }
 
-utils.generateOrderCode = (prefix = 'FKP') => {
-    const timestamp = Date.now().toString().slice(-8)
+utils.generateGoogleLink = (location) => {
+    const { latitude, longitude } = location
+    return `https://www.google.com/maps?q=${latitude},${longitude}`
+}
+
+utils.generateOrderCode = (prefix = 'F') => {
+    const timestamp = Date.now().toString().slice(-4)
     const randomNum = Math.floor(Math.random() * 100)
-    return `${prefix}${timestamp}${randomNum}`
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const randomChr = alphabet[Math.floor(Math.random() * alphabet.length)]
+    return `${prefix}${timestamp}${randomNum}${randomChr}`
+}
+
+utils.populateTemplate = (template, data) => {
+    return template.replace(/{(\w+)}/g, (match, key) => {
+        if (Array.isArray(data)) {
+            return typeof data[key - 1] !== 'undefined' ? data[key - 1] : match
+        } else {
+            return typeof data[key] !== 'undefined' ? data[key] : match
+        }
+    })
+}
+
+utils.populateOrderStatus = (status) => {
+    switch (status) {
+        case 'pending':
+            return 'လက်ခံရန် စောင့်ဆိုင်းနေပါပြီ ⏰။'
+        case 'accepted':
+            return 'လက်ခံရရှိပါပြီ ✅။'
+        case 'completed':
+            return 'အောင်မြင်စွာ ပို့ဆောင်ပြီးပါပြီ ✅။'
+        case 'canceled':
+            return 'အမှာစာ လက်မခံပါ ❌။'
+        default:
+            return 'မသိသေးပါ။'
+    }
 }
 
 utils.createOrderPayload = (shop, customer, orderCart) => {
@@ -29,22 +61,7 @@ utils.createOrderPayload = (shop, customer, orderCart) => {
         customer_phone: customer.phone,
         customer_addr: customer.address,
         customer_platform_id: customer.platform_id,
-        items: orderCart,
         total_amount: totalAmount,
-    }
-}
-
-utils.getOrderStatus = (status) => {
-    switch (status) {
-        case 'pending':
-            return 'လက်ခံရန် စောင့်ဆိုင်းနေပါပြီ ⏰။'
-        case 'accepted':
-            return 'လက်ခံရရှိပါပြီ ✅။'
-        case 'completed':
-            return 'အောင်မြင်စွာ ပို့ဆောင်ပြီးပါပြီ ✅။'
-        case 'canceled':
-            return 'အမှာစာ လက်မခံနိုင်ပါ ❌။'
-        default:
-            return 'မသိသေးပါ။'
+        items: orderCart,
     }
 }

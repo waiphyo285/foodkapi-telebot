@@ -1,0 +1,7 @@
+{
+    "$shop": "SELECT_SHOP",
+    "$category": "SELECT_CATEGORY",
+    "$product": "SELECT_PRODUCT",
+    "$add_to_cart": "ADD_TO_CART",
+    "$checkout": "CHECKOUT"
+}

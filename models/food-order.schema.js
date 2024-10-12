@@ -68,6 +68,15 @@ const makeSchema = new Schema({
         enum: ['telegram', 'messenger'],
         default: 'telegram',
     },
+    latitude: {
+        type: Number,
+    },
+    longitude: {
+        type: Number,
+    },
+    google_map: {
+        type: String,
+    },
     status: {
         type: String,
         enum: ['pending', 'accepted', 'completed', 'canceled', 'archived'],

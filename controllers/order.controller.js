@@ -9,6 +9,7 @@ const orderRepository = new CommonRepository(OrderModel)
 const listOrders = async (req, res) => {
     try {
         const filter = req.query.filter || {}
+        if (filter.status) filter.status = capitalizeWord(filter.status)
         const limit = parseInt(req.query.limit, 10) || 10
         const page = parseInt(req.query.page, 10) || 1
         const sort = req.query.sort || { created_at: -1 }

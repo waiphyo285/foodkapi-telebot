@@ -2,6 +2,14 @@ const { faker } = require('@faker-js/faker')
 
 const utils = (module.exports = {})
 
+utils.capitalizeWord = (text) => {
+    if (!text) return ''
+    return text
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+}
+
 utils.escapeMarkdownV2 = (text) => {
     return text
         .replace(/([_*{}[\]()~`>#+\-|.!])/g, '\\$1') // Escape special chars
@@ -32,18 +40,14 @@ utils.populateTemplate = (template, data) => {
 }
 
 utils.populateOrderStatus = (status) => {
-    switch (status) {
-        case 'pending':
-            return 'လက်ခံရန် စောင့်ဆိုင်းနေပါပြီ ⏰။'
-        case 'accepted':
-            return 'လက်ခံရရှိပါပြီ ✅။'
-        case 'completed':
-            return 'အောင်မြင်စွာ ပို့ဆောင်ပြီးပါပြီ ✅။'
-        case 'canceled':
-            return 'အမှာစာ လက်မခံပါ ❌။'
-        default:
-            return 'မသိသေးပါ။'
-    }
+    return {
+        Pending: 'စောင့်ဆိုင်းနေပါပြီ ⏰',
+        'Awaiting Confirmation': 'အတည်ပြုရန် ⏰',
+        Confirmed: 'အတည်ပြုပြီးပါပြီ ✅',
+        Accepted: 'လက်ခံရရှိပါပြီ ✅',
+        Completed: 'ပို့ဆောင်ပြီးပါပြီ ✅',
+        Canceled: 'အမှာစာ လက်မခံပါ ❌',
+    }[status]
 }
 
 utils.createOrderPayload = (shop, customer, orderCart) => {

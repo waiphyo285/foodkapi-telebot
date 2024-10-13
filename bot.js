@@ -1,8 +1,8 @@
 const { faker } = require('@faker-js/faker')
 const TelegramBot = require('node-telegram-bot-api')
 const CommonRepo = require('./repositories/common.repo')
-const customerModel = require('./models/customer.schema')
-const foodOrderModel = require('./models/food-order.schema')
+const OrderModel = require('./models/order.schema')
+const CustomerModel = require('./models/customer.schema')
 const shops = require('./datasources/shops.json')
 const states = require('./datasources/bot/states.json')
 const actions = require('./datasources/bot/actions.json')
@@ -27,8 +27,8 @@ const userStates = {}
 const userCarts = {}
 
 // Initialize repositories
-const customerRepo = new CommonRepo(customerModel)
-const foodOderRepo = new CommonRepo(foodOrderModel)
+const orderRepo = new CommonRepo(OrderModel)
+const customerRepo = new CommonRepo(CustomerModel)
 
 bot.setMyCommands(commands)
     .then(() => console.info('🤖 Hello everybody, I am started!'))
@@ -206,7 +206,6 @@ const showCartSummary = async (chatId) => {
     const orderSummary = cart
         .map((item) => ` 🔸 ${item.name} x${item.quantity} - ${item.price * item.quantity} ${currency.baht}`)
         .join('\n')
-
     const templateMsg = populateTemplate(messages.show_cart_summary, {
         orderSummary,
         total,
@@ -218,8 +217,8 @@ const showCartSummary = async (chatId) => {
 
 // Show current order list to user
 const showOrderList = async (chatId) => {
-    const pendingOrders = await foodOderRepo.list({ customer_platform_id: chatId, status: 'pending' })
-    const confirmedOrders = await foodOderRepo.list({ customer_platform_id: chatId, status: 'accepted' })
+    const pendingOrders = await orderRepo.list({ customer_platform_id: chatId, status: 'Pending' })
+    const confirmedOrders = await orderRepo.list({ customer_platform_id: chatId, status: 'Accepted' })
     const mergedOrders = [...pendingOrders, ...confirmedOrders]
 
     if (mergedOrders.length === 0) {
@@ -227,11 +226,11 @@ const showOrderList = async (chatId) => {
         return
     }
 
-    mergedOrders.forEach((order) => showOrderConfirmation(order, false))
+    mergedOrders.forEach((order) => showOrderConfirmation(order))
 }
 
 // Show order status to ordered user
-const showOrderConfirmation = async (order, showButton = true) => {
+const showOrderConfirmation = async (order, showButton = false) => {
     const orderSummary = order.items
         .map((item) => ` 🔸 ${item.name} x${item.quantity} - ${item.price * item.quantity} ${currency.baht}`)
         .join('\n')
@@ -248,6 +247,22 @@ const showOrderConfirmation = async (order, showButton = true) => {
     const templateMsg =
         populateTemplate(messages.show_order_summary, templateData) + ' \n\n' + messages.show_delivery_warn
     bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2', ...buttons })
+}
+
+// Show order action to ordered user
+const showOrderActionMsg = async (orderAction) => {
+    const receiverId = orderAction.customer_platform_id
+    if (orderAction.action_type === 'Message') {
+        const templateMsg = populateTemplate(messages.req_confirm_msg, {
+            orderCode: orderAction.code,
+            additionalCharge: orderAction.additional_charge,
+            noteMsg: orderAction.message,
+        })
+        bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2' })
+    } else {
+        const templateMsg = populateTemplate(messages.req_location_msg, { orderCode: orderAction.code })
+        bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), locationMenuOptions())
+    }
 }
 
 // Process user is registered to make order
@@ -303,8 +318,8 @@ const processMessage = async (msg) => {
 
         if (location) {
             const userLocation = { ...location, google_map: generateGoogleLink(location) }
-            if (orderCode) orderDetail = await foodOderRepo.updateBy({ code: orderCode }, userLocation)
-            else await foodOderRepo.updateMany({ platform_id: chatId, status: 'pending' }, userLocation)
+            if (orderCode) orderDetail = await orderRepo.updateBy({ code: orderCode }, userLocation)
+            else await orderRepo.updateMany({ platform_id: chatId, status: 'Pending' }, userLocation)
             returnMsg = populateTemplate(messages.send_location_msg, { orderCode: orderDetail?.code || null })
         }
 
@@ -423,7 +438,7 @@ const processMessage = async (msg) => {
 
                 const customer = await customerRepo.getOneBy({ platform_id: chatId })
 
-                await foodOderRepo
+                await orderRepo
                     .create(createOrderPayload(selectedShop, customer, cart))
                     .then((response) => {
                         orderRes = response
@@ -439,15 +454,15 @@ const processMessage = async (msg) => {
                         return bot.sendMessage(receiverId, escapeMarkdownV2(receiveMsg), { parse_mode: 'MarkdownV2' })
                     })
                     .then(async () => {
-                        const confirmedData = {
+                        const templateData = {
+                            shopName: orderRes.shop_name,
                             orderCode: orderRes.code,
-                            shopName: selectedShop.name,
                             orderSummary,
                             total,
                             currency: currency.baht,
                             noteMsg: messages.show_delivery_warn,
                         }
-                        const confirmedMsg = populateTemplate(messages.confirm_order_msg, confirmedData)
+                        const confirmedMsg = populateTemplate(messages.confirm_order_msg, templateData)
                         const locationMsg = populateTemplate(messages.ask_location_msg, { orderCode: orderRes.code })
                         bot.sendMessage(chatId, escapeMarkdownV2(confirmedMsg), { parse_mode: 'MarkdownV2' })
                         bot.sendMessage(chatId, locationMsg, locationMenuOptions())
@@ -587,4 +602,4 @@ bot.on('callback_query', async (callbackQuery) => {
     bot.answerCallbackQuery(callbackQuery.id)
 })
 
-module.exports = { showOrderConfirmation }
+module.exports = { showOrderConfirmation, showOrderActionMsg }

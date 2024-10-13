@@ -79,8 +79,8 @@ const makeSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'accepted', 'completed', 'canceled', 'archived'],
-        default: 'pending',
+        enum: ['Pending', 'Awaiting Confirmation', 'Confirmed', 'Accepted', 'Completed', 'Canceled', 'Archived'],
+        default: 'Pending',
     },
     ordered_at: {
         type: Date,

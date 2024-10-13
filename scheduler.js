@@ -1,9 +1,9 @@
 const cron = require('node-cron')
 // const socketClient = require('./socket-client')
 const CommonRepo = require('./repositories/common.repo')
-const foodOrderModel = require('./models/food-order.schema')
+const OrderModel = require('./models/order.schema')
 
-const foodOderRepo = new CommonRepo(foodOrderModel)
+const orderRepo = new CommonRepo(OrderModel)
 
 // sends greeting to the socket client
 // cron.schedule('0 0 * * *', async () => {
@@ -12,6 +12,6 @@ const foodOderRepo = new CommonRepo(foodOrderModel)
 
 // run the scheduler to archive uncompleted orders
 cron.schedule('0 20 * * *', async () => {
-    await foodOderRepo.updateMany({ status: 'pending' }, { status: 'archived' })
-    await foodOderRepo.updateMany({ status: 'accepted' }, { status: 'archived' })
+    await orderRepo.updateMany({ status: 'Pending' }, { status: 'archived' })
+    await orderRepo.updateMany({ status: 'Accepted' }, { status: 'archived' })
 })

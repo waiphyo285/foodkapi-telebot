@@ -1,6 +1,7 @@
-const OrderModel = require('../models/food-order.schema')
+const OrderModel = require('../models/order.schema')
 const CommonRepository = require('../repositories/common.repo')
 const { showOrderConfirmation } = require('../bot')
+const { capitalizeWord } = require('../utils')
 
 const orderRepository = new CommonRepository(OrderModel)
 
@@ -43,6 +44,7 @@ const createOrder = async (req, res) => {
 const updateOrder = async (req, res) => {
     try {
         const orderId = req.params.id
+        if (req.body.status) req.body.status = capitalizeWord(req.body.status)
         const updateData = req.body
         const updatedOrder = await orderRepository.update(orderId, updateData)
         await showOrderConfirmation(updatedOrder) // from bot to user (customer)

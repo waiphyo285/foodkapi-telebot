@@ -256,12 +256,13 @@ const showOrderActionMsg = async (orderAction) => {
         const templateMsg = populateTemplate(messages.req_confirm_msg, {
             orderCode: orderAction.code,
             additionalCharge: orderAction.additional_charge,
+            currency: currency.baht,
             noteMsg: orderAction.message,
         })
         bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2' })
     } else {
         const templateMsg = populateTemplate(messages.req_location_msg, { orderCode: orderAction.code })
-        bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), locationMenuOptions())
+        bot.sendMessage(receiverId, templateMsg, locationMenuOptions())
     }
 }
 

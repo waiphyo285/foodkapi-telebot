@@ -8,7 +8,7 @@ const indexRouter = require('./routes/index.route')
 const { sessionUrls } = require('./models/connection')
 
 // Socket started
-// require("./socket");
+require('./socket')
 
 // Scheduler running
 require('./scheduler')

@@ -9,7 +9,6 @@ const makeSchema = new Schema({
     code: {
         type: String,
         required: true,
-        unique: true,
     },
     order_id: {
         type: mongoose.Schema.Types.ObjectId,

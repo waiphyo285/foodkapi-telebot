@@ -30,5 +30,13 @@
     "visit_us": {
         "id": "www.neohubasia.com",
         "text": "🌐 ဝဘ်ဆိုက်"
+    },
+    "cancel_order": {
+        "id": "cancel_order",
+        "text": "❎  ပယ်ဖျက်မည်"
+    },
+    "confirm_order": {
+        "id": "confirm_order",
+        "text": "✅ အတည်ပြုမည်"
     }
 }

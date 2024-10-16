@@ -16,6 +16,7 @@ const {
     populateOrderStatus,
     generateGoogleLink,
 } = require('./utils')
+const socketClient = require('./socket-client')
 
 const orderIdRegex = /#([A-Z0-9]+)/
 const botToken = process.env.TG_BOT_TOKEN
@@ -62,18 +63,34 @@ const resetUserCart = async (chatId) => {
 }
 
 // Helper function to display buttons for bot
-const mainMenuOptions = (params = {}) => {
-    const buttons = [
-        {
+const mainMenuOptions = (params = {}, includeMain = true) => {
+    const buttons = []
+
+    if (includeMain) {
+        buttons.push({
             text: actions.restart.text,
             callback_data: actions.restart.id,
-        },
-    ]
+        })
+    }
 
     if (params.visitUs) {
         buttons.push({
             text: actions.visit_us.text,
             url: actions.visit_us.id,
+        })
+    }
+
+    if (params.cancelBtn) {
+        buttons.push({
+            text: actions.cancel_order.text,
+            callback_data: actions.cancel_order.id,
+        })
+    }
+
+    if (params.confirmBtn) {
+        buttons.push({
+            text: actions.confirm_order.text,
+            callback_data: actions.confirm_order.id,
         })
     }
 
@@ -175,7 +192,7 @@ const showProducts = async (chatId, category) => {
 }
 
 // Add product to user's cart with specified quantity
-const addToCart = async (chatId, product, quantity) => {
+const addToCartItem = async (chatId, product, quantity) => {
     await initializeCart(chatId)
     const cart = userCarts[chatId]
     const existingProduct = cart.find((item) => item.name === product.name)
@@ -249,7 +266,7 @@ const showOrderConfirmation = async (order, showButton = false) => {
     bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2', ...buttons })
 }
 
-// Show order action to ordered user
+// Order confirmation to ordered user
 const showOrderActionMsg = async (orderAction) => {
     const receiverId = orderAction.customer_platform_id
 
@@ -266,7 +283,53 @@ const showOrderActionMsg = async (orderAction) => {
             currency: currency.baht,
             noteMsg: orderAction.message,
         })
-        bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2' })
+        const buttons = mainMenuOptions({ cancelBtn: true, confirmBtn: true }, false)
+        bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2', ...buttons })
+    }
+}
+
+// User confirm or cancel order confirmation msg
+const processOrderAction = async (msg, selectedBtn) => {
+    let updateOrder
+    const status = selectedBtn
+    const chatId = msg.chat.id
+    const orderCode = msg?.text && (match = msg.text.match(orderIdRegex)) ? match[1] : undefined
+
+    if (orderCode) {
+        const order = await orderRepo.getOneBy({ code: orderCode })
+        order.status == 'Awaiting Confirmation'
+            ? (updateOrder = await orderRepo.updateBy({ code: orderCode }, { status }))
+            : bot.sendMessage(chatId, messages.confirm_order_warn2)
+    }
+
+    if (updateOrder) {
+        if (updateOrder.status == 'Confirmed') {
+            const sendMsg = populateTemplate(messages.confirm_order_msg2, {
+                orderCode: updateOrder?.code || null,
+                shopName: updateOrder.shop_name,
+            })
+            const receiveMsg = populateTemplate(messages.receive_confirm_order_msg, {
+                orderCode: updateOrder?.code || null,
+                customerName: updateOrder.customer_name,
+            })
+            bot.sendMessage(chatId, sendMsg)
+            bot.sendMessage(updateOrder.shop_platform_id, receiveMsg)
+        }
+
+        if (status === 'Canceled') {
+            const sendMsg = populateTemplate(messages.cancel_order_msg, {
+                orderCode: updateOrder?.code || null,
+                shopName: updateOrder.shop_name,
+            })
+            const receiveMsg = populateTemplate(messages.receive_cancel_order_msg, {
+                orderCode: updateOrder?.code || null,
+                customerName: updateOrder.customer_name,
+            })
+            bot.sendMessage(chatId, sendMsg)
+            bot.sendMessage(updateOrder.shop_platform_id, receiveMsg)
+        }
+
+        socketClient.send(JSON.stringify({ channel: 'Update', data: updateOrder }))
     }
 }
 
@@ -417,7 +480,7 @@ const processMessage = async (msg) => {
             case states.$add_to_cart: {
                 const quantity = parseInt(text)
                 if (!isNaN(quantity) && quantity > 0) {
-                    await addToCart(chatId, selectedProduct, quantity)
+                    await addToCartItem(chatId, selectedProduct, quantity)
                     templateMsg = populateTemplate(messages.add_to_cart_msg, {
                         productName: selectedProduct.name,
                         quantity: quantity,
@@ -597,6 +660,14 @@ bot.on('callback_query', async (callbackQuery) => {
             if (!(await handleUserAction(msg))) return
             await setUserState(chatId, states.$checkout)
             await processMessage(msg)
+            break
+
+        case actions.cancel_order.id:
+            await processOrderAction(msg, 'Canceled')
+            break
+
+        case actions.confirm_order.id:
+            await processOrderAction(msg, 'Confirmed')
             break
 
         default:

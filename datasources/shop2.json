@@ -1,0 +1,66 @@
+[
+    {
+        "name": "Primuschi Food",
+        "receiverId": 1851464734,
+        "categories": [
+            {
+                "name": "စားဖွယ်များ 🍨",
+                "items": [
+                    {
+                        "name": "Grass-fed beef graprao",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402234383.jpg",
+                        "price": 299
+                    },
+                    {
+                        "name": "Chicken Shawarma",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402318629.jpg",
+                        "price": 299
+                    },
+                    {
+                        "name": "Italian pork meatballs",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402337604.jpg",
+                        "price": 299
+                    },
+                    {
+                        "name": "Shakshuka lamb",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402358995.jpg",
+                        "price": 299
+                    },
+                    {
+                        "name": "Chicken schnitzel",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402391354.jpg",
+                        "price": 299
+                    }
+                ]
+            },
+            {
+                "name": "သောက်ဖွယ်များ 🧋",
+                "items": [
+                    {
+                        "name": "Pushers",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402503897.jpg",
+                        "price": 20
+                    },
+                    {
+                        "name": "Zuza Passion Fruit",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402493710.jpg",
+                        "price": 20
+                    },
+                    {
+                        "name": "Zuza Lime",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402499157.jpg",
+                        "price": 25
+                    }
+                ]
+            }
+        ]
+    }
+]

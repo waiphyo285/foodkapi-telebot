@@ -18,21 +18,21 @@ const pass = config.MONGO_PASS || ''
 const dbName = config.DATABASE_NAME || 'no_db'
 const memoName = config.MEMOBASE_NAME || 'no_memo'
 
-const sessionUrls = {
-    development: `mongodb://${host}:${port}/${memoName}`,
-    production: `mongodb://${user}:${pass}@${host}:${port}/${memoName}?directConnection=true&serverSelectionTimeoutMS=2000&authSource=${memoName}&appName=mongosh+2.1.1`,
-    // production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?authSource=admin`,
-}
-
-const connectionUrls = {
+const mainConnections = {
     development: `mongodb://${host}:${port}/${dbName}`,
     production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?directConnection=true&serverSelectionTimeoutMS=2000&authSource=${dbName}&appName=mongosh+2.1.1`,
     // production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?authSource=admin`,
 }
 
+const secondConnections = {
+    development: `mongodb://${host}:${port}/${memoName}`,
+    production: `mongodb://${user}:${pass}@${host}:${port}/${memoName}?directConnection=true&serverSelectionTimeoutMS=2000&authSource=${memoName}&appName=mongosh+2.1.1`,
+    // production: `mongodb://${user}:${pass}@${host}:${port}/${dbName}?authSource=admin`,
+}
+
 // Create connection
 const dbConnect = async () => {
-    const dbUrl = connectionUrls[env]
+    const dbUrl = mainConnections[env]
     console.info(`DB Url  : 🖇️  ${dbUrl}`)
     await mongoose.connect(dbUrl)
 }
@@ -58,4 +58,4 @@ mongoose.connection
         console.warn(`Database: ⛓️‍💥 MongoDB is disconnected`)
     })
 
-module.exports = { mongoose, dbConnect, dbDisconnect, sessionUrls }
+module.exports = { mongoose, dbConnect, dbDisconnect, secondConnections }

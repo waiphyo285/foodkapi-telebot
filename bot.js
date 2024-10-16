@@ -252,6 +252,13 @@ const showOrderConfirmation = async (order, showButton = false) => {
 // Show order action to ordered user
 const showOrderActionMsg = async (orderAction) => {
     const receiverId = orderAction.customer_platform_id
+
+    if (orderAction.action_type === 'Request Location') {
+        const templateMsg = populateTemplate(messages.req_location_msg, { orderCode: orderAction.code })
+        bot.sendMessage(receiverId, templateMsg, locationMenuOptions())
+        return
+    }
+
     if (orderAction.action_type === 'Message') {
         const templateMsg = populateTemplate(messages.req_confirm_msg, {
             orderCode: orderAction.code,
@@ -260,9 +267,6 @@ const showOrderActionMsg = async (orderAction) => {
             noteMsg: orderAction.message,
         })
         bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2' })
-    } else {
-        const templateMsg = populateTemplate(messages.req_location_msg, { orderCode: orderAction.code })
-        bot.sendMessage(receiverId, templateMsg, locationMenuOptions())
     }
 }
 

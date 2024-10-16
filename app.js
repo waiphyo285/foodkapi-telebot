@@ -5,7 +5,7 @@ const morgan = require('morgan')
 const resmaker = require('express-resmaker').default
 const MongoStore = require('connect-mongo')
 const indexRouter = require('./routes/index.route')
-const { sessionUrls } = require('./models/connection')
+const { secondConnections } = require('./models/connection')
 
 // Socket started
 require('./socket')
@@ -20,7 +20,7 @@ const app = express()
 const ENV = process.env.NODE_ENV
 const PORT = process.env.APP_PORT || 5000
 
-console.info(`SS Url  : 🖇️  ${sessionUrls[ENV]}`)
+console.info(`SS Url  : 🖇️  ${secondConnections[ENV]}`)
 
 app.use(morgan('combined'))
 app.use(express.urlencoded({ extended: true }))
@@ -33,7 +33,7 @@ app.use(
         saveUninitialized: true,
         resave: false,
         store: MongoStore.create({
-            mongoUrl: sessionUrls[ENV],
+            mongoUrl: secondConnections[ENV],
             ttl: 14 * 24 * 60 * 60,
         }),
     })

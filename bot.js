@@ -157,8 +157,8 @@ const showCustomerInfo = async (chatId) => {
     const customer = await customerRepo.getOneBy({ platform_id: chatId })
     if (customer) {
         const data = { name: customer.fullname, phone: customer.phone || 'N/A', address: customer.address || 'N/A' }
-        const templateMsg = populateTemplate(messages.show_customer_info, data) + '\n\n' + messages.show_customer_warn
-        await bot.sendMessage(chatId, templateMsg, profileMenuOptions())
+        const message = populateTemplate(messages.show_customer_info, data) + '\n\n' + messages.show_customer_warn
+        await bot.sendMessage(chatId, message, profileMenuOptions())
     } else {
         await bot.sendMessage(chatId, messages.ask_register_msg)
     }
@@ -174,8 +174,8 @@ const showShopMenu = async (chatId) => {
 // Send a list of categories from selected shop
 const showCategoryMenu = async (chatId, shop) => {
     const categories = shop.categories.map((category, index) => `${index + 1}. ${category.name}`).join('\n')
-    const templateMsg = populateTemplate(messages.select_category_msg, { shopName: shop.name }) + '\n\n' + categories
-    bot.sendMessage(chatId, templateMsg, { parse_mode: 'Markdown' })
+    const message = populateTemplate(messages.select_category_msg, { shopName: shop.name }) + '\n\n' + categories
+    bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
 }
 
 // Send a list of products from selected category
@@ -186,9 +186,8 @@ const showProducts = async (chatId, category) => {
                 `${index + 1}. ${item.name} - ${item.price} ${currency.baht} ${item.description && '\n    - ' + item.description}`
         )
         .join('\n')
-    const templateMsg =
-        populateTemplate(messages.select_product_msg, { categoryName: category.name }) + '\n\n' + products
-    bot.sendMessage(chatId, templateMsg, { parse_mode: 'Markdown' })
+    const message = populateTemplate(messages.select_product_msg, { categoryName: category.name }) + '\n\n' + products
+    bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
 }
 
 // Add product to user's cart with specified quantity
@@ -218,31 +217,29 @@ const showCartSummary = async (chatId) => {
         bot.sendMessage(chatId, messages.empty_cart_msg)
         return
     }
-
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const orderSummary = cart
         .map((item) => ` 🔸 ${item.name} x${item.quantity} - ${item.price * item.quantity} ${currency.baht}`)
         .join('\n')
-    const templateMsg = populateTemplate(messages.show_cart_summary, {
+    const message = populateTemplate(messages.show_cart_summary, {
         orderSummary,
         total,
         currency: currency.baht,
         checkoutMsg: messages.ask_checkout_msg,
     })
-    bot.sendMessage(chatId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2', ...showCartOptions() })
+    bot.sendMessage(chatId, escapeMarkdownV2(message), { parse_mode: 'MarkdownV2', ...showCartOptions() })
 }
 
 // Show current order list to user
 const showOrderList = async (chatId) => {
-    const pendingOrders = await orderRepo.list({ customer_platform_id: chatId, status: 'Pending' })
-    const confirmedOrders = await orderRepo.list({ customer_platform_id: chatId, status: 'Accepted' })
-    const mergedOrders = [...pendingOrders, ...confirmedOrders]
+    // const pendingOrders = await orderRepo.list({ customer_platform_id: chatId, status: 'Pending' })
+    // const confirmedOrders = await orderRepo.list({ customer_platform_id: chatId, status: 'Accepted' })
+    // const mergedOrders = [...pendingOrders, ...confirmedOrders]
 
     if (mergedOrders.length === 0) {
         bot.sendMessage(chatId, messages.empty_order_msg)
         return
     }
-
     mergedOrders.forEach((order) => showOrderConfirmation(order))
 }
 
@@ -251,40 +248,39 @@ const showOrderConfirmation = async (order, showButton = false) => {
     const orderSummary = order.items
         .map((item) => ` 🔸 ${item.name} x${item.quantity} - ${item.price * item.quantity} ${currency.baht}`)
         .join('\n')
-    const receiverId = order.customer_platform_id
+    const userChatId = order.customer_platform_id
     const buttons = showButton ? mainMenuOptions() : {}
-    const templateData = {
+    const data = {
         orderCode: order.code,
         shopName: order.shop_name,
-        orderSummary,
         total: order.total_amount,
         currency: currency.baht,
+        orderSummary: orderSummary,
         statusMsg: populateOrderStatus(order.status),
     }
-    const templateMsg =
-        populateTemplate(messages.show_order_summary, templateData) + ' \n\n' + messages.show_delivery_warn
-    bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2', ...buttons })
+    const message = populateTemplate(messages.show_order_summary, data) + ' \n\n' + messages.show_delivery_warn
+    bot.sendMessage(userChatId, escapeMarkdownV2(message), { parse_mode: 'MarkdownV2', ...buttons })
 }
 
 // Order confirmation to ordered user
 const showOrderActionMsg = async (orderAction) => {
-    const receiverId = orderAction.customer_platform_id
+    const userChatId = order.customer_platform_id
 
     if (orderAction.action_type === 'Request Location') {
-        const templateMsg = populateTemplate(messages.req_location_msg, { orderCode: orderAction.code })
-        bot.sendMessage(receiverId, templateMsg, locationMenuOptions())
+        const message = populateTemplate(messages.req_location_msg, { orderCode: orderAction.code })
+        bot.sendMessage(userChatId, message, locationMenuOptions())
         return
     }
 
     if (orderAction.action_type === 'Message') {
-        const templateMsg = populateTemplate(messages.req_confirm_msg, {
+        const message = populateTemplate(messages.req_confirm_msg, {
             orderCode: orderAction.code,
             additionalCharge: orderAction.additional_charge,
             currency: currency.baht,
             noteMsg: orderAction.message,
         })
         const buttons = mainMenuOptions({ cancelBtn: true, confirmBtn: true }, false)
-        bot.sendMessage(receiverId, escapeMarkdownV2(templateMsg), { parse_mode: 'MarkdownV2', ...buttons })
+        bot.sendMessage(userChatId, escapeMarkdownV2(message), { parse_mode: 'MarkdownV2', ...buttons })
     }
 }
 
@@ -304,29 +300,31 @@ const processOrderAction = async (msg, selectedBtn) => {
 
     if (updateOrder) {
         if (updateOrder.status == 'Confirmed') {
-            const sendMsg = populateTemplate(messages.confirm_order_msg2, {
+            const userMsg = populateTemplate(messages.confirm_order_msg2, {
                 orderCode: updateOrder?.code || null,
                 shopName: updateOrder.shop_name,
             })
-            const receiveMsg = populateTemplate(messages.receive_confirm_order_msg, {
+            const ownerMsg = populateTemplate(messages.receive_confirm_order_msg, {
                 orderCode: updateOrder?.code || null,
                 customerName: updateOrder.customer_name,
             })
-            bot.sendMessage(chatId, sendMsg)
-            bot.sendMessage(updateOrder.shop_platform_id, receiveMsg)
+            const ownerChatId = updateOrder.shop_platform_id
+            bot.sendMessage(chatId, userMsg)
+            bot.sendMessage(ownerChatId, ownerMsg)
         }
 
         if (status === 'Canceled') {
-            const sendMsg = populateTemplate(messages.cancel_order_msg, {
+            const userMsg = populateTemplate(messages.cancel_order_msg, {
                 orderCode: updateOrder?.code || null,
                 shopName: updateOrder.shop_name,
             })
-            const receiveMsg = populateTemplate(messages.receive_cancel_order_msg, {
+            const ownerMsg = populateTemplate(messages.receive_cancel_order_msg, {
                 orderCode: updateOrder?.code || null,
                 customerName: updateOrder.customer_name,
             })
-            bot.sendMessage(chatId, sendMsg)
-            bot.sendMessage(updateOrder.shop_platform_id, receiveMsg)
+            const ownerChatId = updateOrder.shop_platform_id
+            bot.sendMessage(chatId, userMsg)
+            bot.sendMessage(ownerChatId, ownerMsg)
         }
 
         socketClient.send(JSON.stringify({ channel: 'Update', data: updateOrder }))
@@ -337,22 +335,22 @@ const processOrderAction = async (msg, selectedBtn) => {
 const processUser = async (msg) => {
     let customer
     let needUpdated = false
-    const { id: platform_id } = msg.chat
-    customer = await customerRepo.getOneBy({ platform_id })
+    const chatId = msg.chat.id
+    customer = await customerRepo.getOneBy({ platform_id: chatId })
 
     if (!customer) {
         const { first_name: fullname, username } = msg.chat
         customer = await customerRepo.create({
-            platform_id,
+            platform_id: chatId,
             username: username || 'nilusr',
             fullname: fullname || faker.person.fullName(),
         })
-        await bot.sendMessage(platform_id, messages.welcome_msg)
+        await bot.sendMessage(chatId, messages.welcome_msg)
     }
 
     if (!customer.is_verified) {
         needUpdated = true
-        await setUserDetail(platform_id, {
+        await setUserDetail(chatId, {
             phoneReqd: true,
             addressReqd: true,
         })
@@ -360,12 +358,12 @@ const processUser = async (msg) => {
 
     if (!customer.phone) {
         needUpdated = true
-        await setUserDetail(platform_id, { phoneReqd: true })
+        await setUserDetail(chatId, { phoneReqd: true })
     }
 
     if (!customer.address) {
         needUpdated = true
-        await setUserDetail(platform_id, { addressReqd: true })
+        await setUserDetail(chatId, { addressReqd: true })
     }
 
     return [customer, needUpdated]
@@ -392,13 +390,13 @@ const processMessage = async (msg) => {
         }
 
         if (orderDetail) {
-            const receiverId = orderDetail.shop_platform_id
-            const receiveMsg = populateTemplate(messages.receive_location_msg, {
+            const ownerChatId = orderDetail.shop_platform_id
+            const ownerMsg = populateTemplate(messages.receive_location_msg, {
                 orderCode: orderDetail.code,
                 customerName: orderDetail.customer_name,
             })
-            bot.sendMessage(receiverId, receiveMsg)
-            bot.sendLocation(receiverId, orderDetail.latitude, orderDetail.longitude)
+            bot.sendMessage(ownerChatId, ownerMsg)
+            bot.sendLocation(ownerChatId, orderDetail.latitude, orderDetail.longitude)
         }
 
         bot.sendMessage(chatId, returnMsg || messages.show_location_warn)
@@ -481,11 +479,11 @@ const processMessage = async (msg) => {
                 const quantity = parseInt(text)
                 if (!isNaN(quantity) && quantity > 0) {
                     await addToCartItem(chatId, selectedProduct, quantity)
-                    templateMsg = populateTemplate(messages.add_to_cart_msg, {
+                    const message = populateTemplate(messages.add_to_cart_msg, {
                         productName: selectedProduct.name,
                         quantity: quantity,
                     })
-                    bot.sendMessage(chatId, templateMsg)
+                    bot.sendMessage(chatId, message)
                     bot.sendMessage(chatId, messages.ask_checkout_msg, showCartOptions())
                 } else {
                     bot.sendMessage(chatId, messages.select_quantity_warn)
@@ -510,29 +508,29 @@ const processMessage = async (msg) => {
                     .create(createOrderPayload(selectedShop, customer, cart))
                     .then((response) => {
                         orderRes = response
-                        const templateData = {
+                        const data = {
                             customerName: orderRes.customer_name,
                             orderCode: orderRes.code,
-                            orderSummary,
-                            total,
                             currency: currency.baht,
+                            orderSummary: orderSummary,
+                            total: total,
                         }
-                        const receiverId = selectedShop.receiverId
-                        const receiveMsg = populateTemplate(messages.receive_order_msg, templateData)
-                        return bot.sendMessage(receiverId, escapeMarkdownV2(receiveMsg), { parse_mode: 'MarkdownV2' })
+                        const ownerChatId = selectedShop.receiverId
+                        const ownerMsg = populateTemplate(messages.receive_order_msg, data)
+                        return bot.sendMessage(ownerChatId, escapeMarkdownV2(ownerMsg), { parse_mode: 'MarkdownV2' })
                     })
                     .then(async () => {
-                        const templateData = {
+                        const data = {
                             shopName: orderRes.shop_name,
                             orderCode: orderRes.code,
-                            orderSummary,
-                            total,
                             currency: currency.baht,
                             noteMsg: messages.show_delivery_warn,
+                            orderSummary: orderSummary,
+                            total: total,
                         }
-                        const confirmedMsg = populateTemplate(messages.confirm_order_msg, templateData)
+                        const userMsg = populateTemplate(messages.confirm_order_msg, data)
                         const locationMsg = populateTemplate(messages.ask_location_msg, { orderCode: orderRes.code })
-                        bot.sendMessage(chatId, escapeMarkdownV2(confirmedMsg), { parse_mode: 'MarkdownV2' })
+                        bot.sendMessage(chatId, escapeMarkdownV2(userMsg), { parse_mode: 'MarkdownV2' })
                         bot.sendMessage(chatId, locationMsg, locationMenuOptions())
                         await setUserState(chatId, states.$shop)
                         await resetUserCart(chatId)
@@ -608,8 +606,8 @@ bot.onText(/\/my_order/, async (msg) => {
 // Handle the /about command to show about bot
 bot.onText(/\/about/, async (msg) => {
     const chatId = msg.chat.id
-    const templateMsg = populateTemplate(messages.bot_info_msg, { supportMsg: messages.support_me_msg })
-    bot.sendMessage(chatId, templateMsg, mainMenuOptions({ visitUs: true }))
+    const message = populateTemplate(messages.bot_info_msg, { supportMsg: messages.support_me_msg })
+    bot.sendMessage(chatId, message, mainMenuOptions({ visitUs: true }))
 })
 
 // Handle all other messages

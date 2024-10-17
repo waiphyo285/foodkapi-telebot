@@ -264,7 +264,7 @@ const showOrderConfirmation = async (order, showButton = false) => {
 
 // Order confirmation to ordered user
 const showOrderActionMsg = async (orderAction) => {
-    const userChatId = order.customer_platform_id
+    const userChatId = orderAction.customer_platform_id
 
     if (orderAction.action_type === 'Request Location') {
         const message = populateTemplate(messages.req_location_msg, { orderCode: orderAction.code })

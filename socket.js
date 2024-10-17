@@ -12,7 +12,7 @@ app.ws('/start', (ws, req) => {
     ws.on('message', (data) => {
         console.log('WS received ', data)
         expressWs.getWss().clients.forEach((client) => {
-            console.log('WS send ', client, data)
+            console.log('WS send ', data)
             client.send(data)
         })
         // ws.send(data)

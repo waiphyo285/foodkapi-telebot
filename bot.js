@@ -397,9 +397,11 @@ const processMessage = async (msg) => {
             })
             bot.sendMessage(ownerChatId, ownerMsg)
             bot.sendLocation(ownerChatId, orderDetail.latitude, orderDetail.longitude)
+            broadcastMessage(JSON.stringify({ channel: 'Update', data: orderDetail }))
         }
 
         bot.sendMessage(chatId, returnMsg || messages.show_location_warn)
+
         return
     }
 
@@ -517,6 +519,7 @@ const processMessage = async (msg) => {
                         }
                         const ownerChatId = selectedShop.receiverId
                         const ownerMsg = populateTemplate(messages.receive_order_msg, data)
+                        broadcastMessage(JSON.stringify({ channel: 'New', data: orderRes }))
                         return bot.sendMessage(ownerChatId, escapeMarkdownV2(ownerMsg), { parse_mode: 'MarkdownV2' })
                     })
                     .then(async () => {

@@ -39,7 +39,8 @@ const createOrder = async (req, res) => {
     try {
         const orderData = req.body
         const newOrder = await orderRepository.create(orderData)
-        socketClient.send(JSON.stringify({ channel: 'New', data: {} }))
+        // socketClient.send(JSON.stringify({ channel: 'New', data: newOrder }))
+        socketClient.send('New Order Created!')
         res.success(newOrder)
     } catch (error) {
         res.serverError(error?.message || 'Something went wrong')
@@ -54,7 +55,7 @@ const updateOrder = async (req, res) => {
         const updateData = req.body
         const updatedOrder = await orderRepository.update(orderId, updateData)
         await showOrderConfirmation(updatedOrder) // from bot to user (customer)
-        socketClient.send(JSON.stringify({ channel: 'Update', data: {} }))
+        // socketClient.send(JSON.stringify({ channel: 'Update', data: updatedOrder }))
         res.success(updatedOrder)
     } catch (error) {
         res.serverError(error?.message || 'Something went wrong')

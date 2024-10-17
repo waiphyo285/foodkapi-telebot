@@ -9,6 +9,7 @@ const actions = require('./datasources/bot/actions.json')
 const commands = require('./datasources/bot/commands.json')
 const currency = require('./datasources/bot/currency.json')
 const messages = require('./datasources/bot/messages.json')
+const { broadcastMessage } = require('./socket2')
 const {
     escapeMarkdownV2,
     createOrderPayload,
@@ -16,7 +17,6 @@ const {
     populateOrderStatus,
     generateGoogleLink,
 } = require('./utils')
-const socketClient = require('./socket-client')
 
 const orderIdRegex = /#([A-Z0-9]+)/
 const botToken = process.env.TG_BOT_TOKEN
@@ -232,15 +232,15 @@ const showCartSummary = async (chatId) => {
 
 // Show current order list to user
 const showOrderList = async (chatId) => {
-    // const pendingOrders = await orderRepo.list({ customer_platform_id: chatId, status: 'Pending' })
-    // const confirmedOrders = await orderRepo.list({ customer_platform_id: chatId, status: 'Accepted' })
-    // const mergedOrders = [...pendingOrders, ...confirmedOrders]
+    const statuses = ['Pending', 'Awaiting Confirmation', 'Confirmed', 'Accepted']
+    const orders = await orderRepo.list({ customer_platform_id: chatId, status: { $in: statuses } })
 
-    if (mergedOrders.length === 0) {
+    if (orders.length === 0) {
         bot.sendMessage(chatId, messages.empty_order_msg)
         return
     }
-    mergedOrders.forEach((order) => showOrderConfirmation(order))
+
+    orders.forEach((order) => showOrderConfirmation(order))
 }
 
 // Show order status to ordered user
@@ -327,7 +327,7 @@ const processOrderAction = async (msg, selectedBtn) => {
             bot.sendMessage(ownerChatId, ownerMsg)
         }
 
-        socketClient.send(JSON.stringify({ channel: 'Update', data: updateOrder }))
+        broadcastMessage(JSON.stringify({ channel: 'Update', data: updateOrder }))
     }
 }
 

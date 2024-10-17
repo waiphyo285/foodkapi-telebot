@@ -1,7 +1,7 @@
 const OrderModel = require('../models/order.schema')
 const CommonRepository = require('../repositories/common.repo')
-const socketClient = require('../socket-client')
 const { showOrderConfirmation } = require('../bot')
+const { broadcastMessage } = require('../socket2')
 const { capitalizeWord } = require('../utils')
 
 const orderRepository = new CommonRepository(OrderModel)
@@ -39,8 +39,7 @@ const createOrder = async (req, res) => {
     try {
         const orderData = req.body
         const newOrder = await orderRepository.create(orderData)
-        // socketClient.send(JSON.stringify({ channel: 'New', data: newOrder }))
-        socketClient.send('New Order Created!')
+        broadcastMessage(JSON.stringify({ channel: 'New', data: newOrder }))
         res.success(newOrder)
     } catch (error) {
         res.serverError(error?.message || 'Something went wrong')
@@ -55,7 +54,7 @@ const updateOrder = async (req, res) => {
         const updateData = req.body
         const updatedOrder = await orderRepository.update(orderId, updateData)
         await showOrderConfirmation(updatedOrder) // from bot to user (customer)
-        // socketClient.send(JSON.stringify({ channel: 'Update', data: updatedOrder }))
+        broadcastMessage(JSON.stringify({ channel: 'Update', data: updatedOrder }))
         res.success(updatedOrder)
     } catch (error) {
         res.serverError(error?.message || 'Something went wrong')

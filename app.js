@@ -6,19 +6,23 @@ const resmaker = require('express-resmaker').default
 const MongoStore = require('connect-mongo')
 const indexRouter = require('./routes/index.route')
 const { secondConnections } = require('./models/connection')
+const { setupWebSocket } = require('./socket2')
 
-// Socket started
-require('./socket')
+const app = express()
+const ENV = process.env.NODE_ENV
+const PORT = process.env.APP_PORT || 5000
+
+// Socket started (not working)
+// require('./socket')
+
+// Socket2 started (working)
+setupWebSocket(app)
 
 // Scheduler running
 require('./scheduler')
 
 // Telegram bot
 require('./bot')
-
-const app = express()
-const ENV = process.env.NODE_ENV
-const PORT = process.env.APP_PORT || 5000
 
 console.info(`SS Url  : 🖇️  ${secondConnections[ENV]}`)
 

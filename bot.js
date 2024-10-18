@@ -313,7 +313,7 @@ const processOrderAction = async (msg, selectedBtn) => {
             bot.sendMessage(ownerChatId, ownerMsg)
         }
 
-        if (status === 'Canceled') {
+        if (updateOrder.status === 'Canceled') {
             const userMsg = populateTemplate(messages.cancel_order_msg, {
                 orderCode: updateOrder?.code || null,
                 shopName: updateOrder.shop_name,

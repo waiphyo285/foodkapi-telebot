@@ -374,8 +374,6 @@ const processMessage = async (msg) => {
     const chatId = msg.chat.id
 
     if (msg.location) {
-        let returnMsg = ''
-        let orderDetail = null
         const location = msg.location
         const replyMsg = msg.reply_to_message
         const orderCode = replyMsg?.text && (match = replyMsg.text.match(orderIdRegex)) ? match[1] : undefined
@@ -384,23 +382,40 @@ const processMessage = async (msg) => {
 
         if (location) {
             const userLocation = { ...location, google_map: generateGoogleLink(location) }
-            if (orderCode) orderDetail = await orderRepo.updateBy({ code: orderCode }, userLocation)
-            else await orderRepo.updateMany({ platform_id: chatId, status: 'Pending' }, userLocation)
-            returnMsg = populateTemplate(messages.send_location_msg, { orderCode: orderDetail?.code || null })
-        }
 
-        if (orderDetail) {
-            const ownerChatId = orderDetail.shop_platform_id
-            const ownerMsg = populateTemplate(messages.receive_location_msg, {
-                orderCode: orderDetail.code,
-                customerName: orderDetail.customer_name,
-            })
-            bot.sendMessage(ownerChatId, ownerMsg)
-            bot.sendLocation(ownerChatId, orderDetail.latitude, orderDetail.longitude)
-            broadcastMessage(JSON.stringify({ channel: 'Update', data: orderDetail }))
+            if (orderCode) {
+                const updateOrder = await orderRepo.updateBy({ code: orderCode }, userLocation)
+                if (orderCode) {
+                    const ownerChatId = updateOrder.shop_platform_id
+                    const userMsg = populateTemplate(messages.send_location_msg, { orderCode: updateOrder.code })
+                    const ownerMsg = populateTemplate(messages.receive_location_msg, {
+                        orderCode: updateOrder.code,
+                        customerName: updateOrder.customer_name,
+                    })
+                    bot.sendMessage(ownerChatId, ownerMsg)
+                    bot.sendLocation(ownerChatId, updateOrder.latitude, updateOrder.longitude)
+                    bot.sendMessage(chatId, userMsg || messages.show_location_warn)
+                }
+            } else {
+                const statusQuery = {
+                    platform_id: chatId,
+                    status: { $in: ['Pending', 'Awaiting Confirmation', 'Confirmed'] },
+                }
+                const userOrder = await orderRepo.getOneBy(statusQuery)
+                const updateOrders = await orderRepo.updateMany({ query }, userLocation)
+                if (updateOrders.modifiedCount > 0 && userOrder) {
+                    const ownerChatId = userOrder.shop_platform_id
+                    const userMsg = populateTemplate(messages.send_location_msg, { orderCode: 'အားလုံး' })
+                    const ownerMsg = populateTemplate(messages.receive_location_msg, {
+                        orderCode: userOrder.code,
+                        customerName: userOrder.customer_name,
+                    })
+                    bot.sendMessage(ownerChatId, ownerMsg)
+                    bot.sendLocation(ownerChatId, userOrder.latitude, userOrder.longitude)
+                    bot.sendMessage(chatId, userMsg || messages.show_location_warn)
+                }
+            }
         }
-
-        bot.sendMessage(chatId, returnMsg || messages.show_location_warn)
 
         return
     }

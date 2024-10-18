@@ -53,7 +53,7 @@ const updateOrder = async (req, res) => {
         if (req.body.status) req.body.status = capitalizeWord(req.body.status)
         const updateData = req.body
         const updatedOrder = await orderRepository.update(orderId, updateData)
-        await showOrderConfirmation(updatedOrder) // from bot to user (customer)
+        await showOrderConfirmation(updatedOrder) // Send message to customer via telegram bot
         broadcastMessage(JSON.stringify({ channel: 'Update', data: updatedOrder }))
         res.success(updatedOrder)
     } catch (error) {

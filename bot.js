@@ -395,8 +395,11 @@ const processMessage = async (msg) => {
                     bot.sendMessage(ownerChatId, ownerMsg)
                     bot.sendLocation(ownerChatId, updateOrder.latitude, updateOrder.longitude)
                     bot.sendMessage(chatId, userMsg || messages.show_location_warn)
+                    broadcastMessage(JSON.stringify({ channel: 'Update', data: updateOrder }))
                 }
             } else {
+                console.info('💬 Processing loc message (ios)', JSON.stringify(msg))
+
                 const statusQuery = {
                     platform_id: chatId,
                     status: { $in: ['Pending', 'Awaiting Confirmation', 'Confirmed'] },
@@ -413,10 +416,10 @@ const processMessage = async (msg) => {
                     bot.sendMessage(ownerChatId, ownerMsg)
                     bot.sendLocation(ownerChatId, userOrder.latitude, userOrder.longitude)
                     bot.sendMessage(chatId, userMsg || messages.show_location_warn)
+                    broadcastMessage(JSON.stringify({ channel: 'Update', data: userOrder }))
                 }
             }
         }
-
         return
     }
 
@@ -517,46 +520,46 @@ const processMessage = async (msg) => {
                     )
                     .join('\n')
 
-                let orderRes
+                try {
+                    const customer = await customerRepo.getOneBy({ platform_id: chatId })
+                    const orderRes = await orderRepo.create(createOrderPayload(selectedShop, customer, cart))
 
-                const customer = await customerRepo.getOneBy({ platform_id: chatId })
+                    const baseData = {
+                        orderCode: orderRes.code,
+                        currency: currency.baht,
+                        orderSummary: orderSummary,
+                        total: total,
+                    }
+                    // Broadcast order details to the owner
+                    const dataForOwner = {
+                        ...baseData,
+                        customerName: orderRes.customer_name,
+                    }
+                    const ownerChatId = selectedShop.receiverId
+                    const ownerMsg = populateTemplate(messages.receive_order_msg, dataForOwner)
+                    await bot.sendMessage(ownerChatId, escapeMarkdownV2(ownerMsg), { parse_mode: 'MarkdownV2' })
 
-                await orderRepo
-                    .create(createOrderPayload(selectedShop, customer, cart))
-                    .then((response) => {
-                        orderRes = response
-                        const data = {
-                            customerName: orderRes.customer_name,
-                            orderCode: orderRes.code,
-                            currency: currency.baht,
-                            orderSummary: orderSummary,
-                            total: total,
-                        }
-                        const ownerChatId = selectedShop.receiverId
-                        const ownerMsg = populateTemplate(messages.receive_order_msg, data)
-                        broadcastMessage(JSON.stringify({ channel: 'New', data: orderRes }))
-                        return bot.sendMessage(ownerChatId, escapeMarkdownV2(ownerMsg), { parse_mode: 'MarkdownV2' })
-                    })
-                    .then(async () => {
-                        const data = {
-                            shopName: orderRes.shop_name,
-                            orderCode: orderRes.code,
-                            currency: currency.baht,
-                            noteMsg: messages.show_delivery_warn,
-                            orderSummary: orderSummary,
-                            total: total,
-                        }
-                        const userMsg = populateTemplate(messages.confirm_order_msg, data)
-                        const locationMsg = populateTemplate(messages.ask_location_msg, { orderCode: orderRes.code })
-                        bot.sendMessage(chatId, escapeMarkdownV2(userMsg), { parse_mode: 'MarkdownV2' })
-                        bot.sendMessage(chatId, locationMsg, locationMenuOptions())
-                        await setUserState(chatId, states.$shop)
-                        await resetUserCart(chatId)
-                    })
-                    .catch((err) => {
-                        bot.sendMessage(chatId, messages.confirm_order_warn)
-                        console.error(err)
-                    })
+                    // Send confirmation to the customer
+                    const dataForUser = {
+                        ...baseData,
+                        shopName: orderRes.shop_name,
+                        noteMsg: messages.show_delivery_warn,
+                    }
+                    const userMsg = populateTemplate(messages.confirm_order_msg, dataForUser)
+                    const locationMsg = populateTemplate(messages.ask_location_msg, { orderCode: orderRes.code })
+                    await bot.sendMessage(chatId, escapeMarkdownV2(userMsg), { parse_mode: 'MarkdownV2' })
+                    await bot.sendMessage(chatId, locationMsg, locationMenuOptions())
+
+                    // Broadcast new order to the owner
+                    broadcastMessage(JSON.stringify({ channel: 'New', data: orderRes }))
+
+                    // Update user state and reset cart
+                    await setUserState(chatId, states.$shop)
+                    await resetUserCart(chatId)
+                } catch (err) {
+                    await bot.sendMessage(chatId, messages.confirm_order_warn)
+                    console.error(err)
+                }
 
                 break
             }

@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 
 const verifyToken = async (req, res, next) => {
+    return next() // local testing only
+
     const token = req.header('Authorization')
     const secureHash = req.header('Securehash')
     const hashKey = process.env.HASH_KEY

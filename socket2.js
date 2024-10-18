@@ -15,7 +15,6 @@ const setupWebSocket = (app) => {
         // Handle incoming messages
         ws.on('message', (data) => {
             console.log('WS received:', data)
-
             // Send the message to all connected clients
             clients.forEach((client) => {
                 if (client.readyState === client.OPEN) {

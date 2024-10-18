@@ -1,0 +1,84 @@
+[
+    {
+        "name": "May Thingyan Min",
+        "receiverId": 5141551226,
+        "categories": [
+            {
+                "name": "စားဖွယ်များ 🍨",
+                "items": [
+                    {
+                        "name": "သရက်သီးသုပ်",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681722646.png",
+                        "price": 25
+                    },
+                    {
+                        "name": "သင်္ဘောသီးသုပ်",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681871702.png",
+                        "price": 25
+                    },
+                    {
+                        "name": "ပြောင်းဖူးလက်ဖက်သုပ်",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681668479.png",
+                        "price": 25
+                    },
+                    {
+                        "name": "ပြောင်းဖူးလက်ဖက်ထမင်း",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681704351.png",
+                        "price": 30
+                    },
+                    {
+                        "name": "ပြောင်းဖူးထောင်း",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681854144.png",
+                        "price": 30
+                    },
+                    {
+                        "name": "သင်္ဘောသီးထောင်း",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681806992.png",
+                        "price": 30
+                    },
+                    {
+                        "name": "အပ်မှိုထောင်း",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681774639.png",
+                        "price": 40
+                    }
+                ]
+            },
+            {
+                "name": "သောက်ဖွယ်များ 🧋",
+                "items": [
+                    {
+                        "name": "Milk Tea",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681963502.png",
+                        "price": 20
+                    },
+                    {
+                        "name": "Thai Tea",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681943905.png",
+                        "price": 20
+                    },
+                    {
+                        "name": "Thai Tea (Bubble)",
+                        "description": "",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681923246.png",
+                        "price": 25
+                    },
+                    {
+                        "name": "SHARK Energy Drink  ",
+                        "description": "2 ဘူး - 55",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681896990.png",
+                        "price": 30
+                    }
+                ]
+            }
+        ]
+    }
+]

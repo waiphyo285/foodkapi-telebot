@@ -1,52 +1,40 @@
 [
     {
-        "name": "May Thingyan Min",
-        "receiverId": 5141551226,
+        "name": "Primuschi Food (Dev)",
+        "receiverId": 1633859412,
         "categories": [
             {
                 "name": "စားဖွယ်များ 🍨",
                 "items": [
                     {
-                        "name": "သရက်သီးသုပ်",
+                        "name": "Grass-fed beef graprao",
                         "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681722646.png",
-                        "price": 25
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402234383.jpg",
+                        "price": 299
                     },
                     {
-                        "name": "သင်္ဘောသီးသုပ်",
+                        "name": "Chicken Shawarma",
                         "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681871702.png",
-                        "price": 25
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402318629.jpg",
+                        "price": 299
                     },
                     {
-                        "name": "ပြောင်းဖူးလက်ဖက်သုပ်",
+                        "name": "Italian pork meatballs",
                         "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681668479.png",
-                        "price": 25
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402337604.jpg",
+                        "price": 299
                     },
                     {
-                        "name": "ပြောင်းဖူးလက်ဖက်ထမင်း",
+                        "name": "Shakshuka lamb",
                         "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681704351.png",
-                        "price": 30
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402358995.jpg",
+                        "price": 299
                     },
                     {
-                        "name": "ပြောင်းဖူးထောင်း",
+                        "name": "Chicken schnitzel",
                         "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681854144.png",
-                        "price": 30
-                    },
-                    {
-                        "name": "သင်္ဘောသီးထောင်း",
-                        "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681806992.png",
-                        "price": 30
-                    },
-                    {
-                        "name": "အပ်မှိုထောင်း",
-                        "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681774639.png",
-                        "price": 40
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402391354.jpg",
+                        "price": 299
                     }
                 ]
             },
@@ -54,28 +42,22 @@
                 "name": "သောက်ဖွယ်များ 🧋",
                 "items": [
                     {
-                        "name": "Milk Tea",
+                        "name": "Pushers",
                         "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681963502.png",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402503897.jpg",
                         "price": 20
                     },
                     {
-                        "name": "Thai Tea",
+                        "name": "Zuza Passion Fruit",
                         "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681943905.png",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402493710.jpg",
                         "price": 20
                     },
                     {
-                        "name": "Thai Tea (Bubble)",
+                        "name": "Zuza Lime",
                         "description": "",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681923246.png",
+                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1728402499157.jpg",
                         "price": 25
-                    },
-                    {
-                        "name": "SHARK Energy Drink  ",
-                        "description": "2 ဘူး - 55",
-                        "image_url": "https://hyperpos.neohubasia.com/uploads/variants/hyper-pos-1727681896990.png",
-                        "price": 30
                     }
                 ]
             }

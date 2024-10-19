@@ -401,6 +401,10 @@ const processMessage = async (msg) => {
                 }
                 const userOrder = await orderRepo.getOneBy(statusQuery)
                 const updateOrders = await orderRepo.updateMany(statusQuery, userLocation)
+
+                console.info('💬 Processing loc message (ios) - userOrder', JSON.stringify(userOrder))
+                console.info('💬 Processing loc message (ios) - updateOrders', JSON.stringify(updateOrders))
+
                 if (updateOrders.modifiedCount > 0 && userOrder) {
                     const shopChatId = userOrder.shop_platform_id
                     const userMsg = populateTemplate(messages.send_location_msg, { orderCode: 'အားလုံး' })

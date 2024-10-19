@@ -408,7 +408,7 @@ const processMessage = async (msg) => {
                 if (updateOrders.ok && userOrders) {
                     for (const order of userOrders) {
                         const shopChatId = order.shop_platform_id
-                        const userMsg = populateTemplate(messages.send_location_msg, { orderCode: 'အားလုံး' })
+                        const userMsg = populateTemplate(messages.send_location_msg, { orderCode: order.code })
                         const shopMsg = populateTemplate(messages.receive_location_msg, {
                             orderCode: order.code,
                             customerName: order.customer_name,

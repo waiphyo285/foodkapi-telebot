@@ -395,27 +395,31 @@ const processMessage = async (msg) => {
             } else {
                 console.info('💬 Processing loc message (ios)', JSON.stringify(msg))
 
-                const orderQuery = {
+                const filters = {
                     customer_platform_id: userChatId,
                     status: { $in: ['Pending', 'Awaiting Confirmation', 'Confirmed'] },
                 }
-                const userOrder = await orderRepo.getOneBy(orderQuery)
-                const updateOrders = await orderRepo.updateMany(orderQuery, userLocation)
+                const userOrders = await orderRepo.list(filters)
+                const updateOrders = await orderRepo.updateMany(filters, userLocation)
 
-                console.info('💬 Processing loc message (ios) - userOrder', JSON.stringify(userOrder))
+                console.info('💬 Processing loc message (ios) - userOrders', JSON.stringify(userOrders))
                 console.info('💬 Processing loc message (ios) - updateOrders', JSON.stringify(updateOrders))
 
-                if (updateOrders.nModified > 0 && userOrder) {
-                    const shopChatId = userOrder.shop_platform_id
-                    const userMsg = populateTemplate(messages.send_location_msg, { orderCode: 'အားလုံး' })
-                    const shopMsg = populateTemplate(messages.receive_location_msg, {
-                        orderCode: userOrder.code,
-                        customerName: userOrder.customer_name,
-                    })
-                    bot.sendMessage(shopChatId, shopMsg)
-                    bot.sendLocation(shopChatId, userOrder.latitude, userOrder.longitude)
-                    bot.sendMessage(userChatId, userMsg || messages.show_location_warn)
-                    broadcastMessage(JSON.stringify({ channel: 'Update', data: userOrder }))
+                if (updateOrders.nModified > 0 && userOrders) {
+                    for (const order of userOrders) {
+                        const shopChatId = order.shop_platform_id
+                        const userMsg = populateTemplate(messages.send_location_msg, { orderCode: 'အားလုံး' })
+                        const shopMsg = populateTemplate(messages.receive_location_msg, {
+                            orderCode: order.code,
+                            customerName: order.customer_name,
+                        })
+                        bot.sendMessage(shopChatId, shopMsg)
+                        order?.latitude &&
+                            order?.longitude &&
+                            bot.sendLocation(shopChatId, order.latitude, order.longitude)
+                        bot.sendMessage(userChatId, userMsg || messages.show_location_warn)
+                        broadcastMessage(JSON.stringify({ channel: 'Update', data: order }))
+                    }
                 }
             }
         }

@@ -395,17 +395,17 @@ const processMessage = async (msg) => {
             } else {
                 console.info('💬 Processing loc message (ios)', JSON.stringify(msg))
 
-                const statusQuery = {
-                    platform_id: userChatId,
+                const orderQuery = {
+                    customer_platform_id: userChatId,
                     status: { $in: ['Pending', 'Awaiting Confirmation', 'Confirmed'] },
                 }
-                const userOrder = await orderRepo.getOneBy(statusQuery)
-                const updateOrders = await orderRepo.updateMany(statusQuery, userLocation)
+                const userOrder = await orderRepo.getOneBy(orderQuery)
+                const updateOrders = await orderRepo.updateMany(orderQuery, userLocation)
 
                 console.info('💬 Processing loc message (ios) - userOrder', JSON.stringify(userOrder))
                 console.info('💬 Processing loc message (ios) - updateOrders', JSON.stringify(updateOrders))
 
-                if (updateOrders.modifiedCount > 0 && userOrder) {
+                if (updateOrders.nModified > 0 && userOrder) {
                     const shopChatId = userOrder.shop_platform_id
                     const userMsg = populateTemplate(messages.send_location_msg, { orderCode: 'အားလုံး' })
                     const shopMsg = populateTemplate(messages.receive_location_msg, {

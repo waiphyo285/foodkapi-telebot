@@ -36,29 +36,29 @@ bot.setMyCommands(commands)
     .catch((err) => console.error(err))
 
 // Helper to set user details
-const setUserDetail = async (chatId, data = {}) => {
-    const currentUserDetails = userDetails[chatId] || {}
-    userDetails[chatId] = { ...currentUserDetails, ...data }
+const setUserDetail = async (userChatId, data = {}) => {
+    const currentUserDetails = userDetails[userChatId] || {}
+    userDetails[userChatId] = { ...currentUserDetails, ...data }
 }
 
 // Helper to set user state
-const setUserState = async (chatId, state, data = {}) => {
-    const currentUserStates = state === states.$shop ? {} : userStates[chatId]
-    userStates[chatId] = { ...currentUserStates, ...data, state }
+const setUserState = async (userChatId, state, data = {}) => {
+    const currentUserStates = state === states.$shop ? {} : userStates[userChatId]
+    userStates[userChatId] = { ...currentUserStates, ...data, state }
 }
 
 // Helper to initialize user cart
-const initializeCart = async (chatId) => {
-    if (!userCarts[chatId]) {
-        userCarts[chatId] = []
+const initializeCart = async (userChatId) => {
+    if (!userCarts[userChatId]) {
+        userCarts[userChatId] = []
     }
 }
 
-const resetUserCart = async (chatId) => {
-    if (userCarts[chatId]) {
-        userCarts[chatId] = []
+const resetUserCart = async (userChatId) => {
+    if (userCarts[userChatId]) {
+        userCarts[userChatId] = []
     } else {
-        await initializeCart(chatId)
+        await initializeCart(userChatId)
     }
 }
 
@@ -153,33 +153,33 @@ const showCartOptions = () => {
 }
 
 // Show customer information
-const showCustomerInfo = async (chatId) => {
-    const customer = await customerRepo.getOneBy({ platform_id: chatId })
+const showCustomerInfo = async (userChatId) => {
+    const customer = await customerRepo.getOneBy({ platform_id: userChatId })
     if (customer) {
         const data = { name: customer.fullname, phone: customer.phone || 'N/A', address: customer.address || 'N/A' }
         const message = populateTemplate(messages.show_customer_info, data) + '\n\n' + messages.show_customer_warn
-        await bot.sendMessage(chatId, message, profileMenuOptions())
+        await bot.sendMessage(userChatId, message, profileMenuOptions())
     } else {
-        await bot.sendMessage(chatId, messages.ask_register_msg)
+        await bot.sendMessage(userChatId, messages.ask_register_msg)
     }
 }
 
 // Send a list of shops for  user to choose from
-const showShopMenu = async (chatId) => {
+const showShopMenu = async (userChatId) => {
     const shopList = shops.map((shop, index) => `${index + 1}. ${shop.name}`).join('\n')
     const message = `${messages.select_shop_msg}\n\n${shopList}`
-    bot.sendMessage(chatId, message)
+    bot.sendMessage(userChatId, message)
 }
 
 // Send a list of categories from selected shop
-const showCategoryMenu = async (chatId, shop) => {
+const showCategoryMenu = async (userChatId, shop) => {
     const categories = shop.categories.map((category, index) => `${index + 1}. ${category.name}`).join('\n')
     const message = populateTemplate(messages.select_category_msg, { shopName: shop.name }) + '\n\n' + categories
-    bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
+    bot.sendMessage(userChatId, message, { parse_mode: 'Markdown' })
 }
 
 // Send a list of products from selected category
-const showProducts = async (chatId, category) => {
+const showProducts = async (userChatId, category) => {
     const products = category.items
         .map(
             (item, index) =>
@@ -187,13 +187,13 @@ const showProducts = async (chatId, category) => {
         )
         .join('\n')
     const message = populateTemplate(messages.select_product_msg, { categoryName: category.name }) + '\n\n' + products
-    bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
+    bot.sendMessage(userChatId, message, { parse_mode: 'Markdown' })
 }
 
 // Add product to user's cart with specified quantity
-const addToCartItem = async (chatId, product, quantity) => {
-    await initializeCart(chatId)
-    const cart = userCarts[chatId]
+const addToCartItem = async (userChatId, product, quantity) => {
+    await initializeCart(userChatId)
+    const cart = userCarts[userChatId]
     const existingProduct = cart.find((item) => item.name === product.name)
     if (existingProduct) {
         existingProduct.quantity += quantity
@@ -203,18 +203,18 @@ const addToCartItem = async (chatId, product, quantity) => {
 }
 
 // Send product details with an image and ask for quantity
-const showProductDetails = async (chatId, product) => {
-    bot.sendPhoto(chatId, product.image_url, {
+const showProductDetails = async (userChatId, product) => {
+    bot.sendPhoto(userChatId, product.image_url, {
         caption: `🍽️ ${product.name} (${product.price} ${currency.baht})\n📝 ${product.description || 'N/A'}\n\nကျေးဇူးပြု၍ မှာယူလိုသော ပမာဏကို ရိုက်ထည့်ပါ။ (eg. 1)`,
         parse_mode: 'Markdown',
     })
 }
 
 // Show current cart summary to user
-const showCartSummary = async (chatId) => {
-    const cart = userCarts[chatId]
+const showCartSummary = async (userChatId) => {
+    const cart = userCarts[userChatId]
     if (!cart || (cart && cart.length === 0)) {
-        bot.sendMessage(chatId, messages.empty_cart_msg)
+        bot.sendMessage(userChatId, messages.empty_cart_msg)
         return
     }
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -227,19 +227,14 @@ const showCartSummary = async (chatId) => {
         currency: currency.baht,
         checkoutMsg: messages.ask_checkout_msg,
     })
-    bot.sendMessage(chatId, escapeMarkdownV2(message), { parse_mode: 'MarkdownV2', ...showCartOptions() })
+    bot.sendMessage(userChatId, escapeMarkdownV2(message), { parse_mode: 'MarkdownV2', ...showCartOptions() })
 }
 
 // Show current order list to user
-const showOrderList = async (chatId) => {
+const showOrderList = async (userChatId) => {
     const statuses = ['Pending', 'Awaiting Confirmation', 'Confirmed', 'Accepted']
-    const orders = await orderRepo.list({ customer_platform_id: chatId, status: { $in: statuses } })
-
-    if (orders.length === 0) {
-        bot.sendMessage(chatId, messages.empty_order_msg)
-        return
-    }
-
+    const orders = await orderRepo.list({ customer_platform_id: userChatId, status: { $in: statuses } })
+    if (orders.length === 0 && bot.sendMessage(userChatId, messages.empty_order_msg)) return
     orders.forEach((order) => showOrderConfirmation(order))
 }
 
@@ -288,14 +283,14 @@ const showOrderActionMsg = async (orderAction) => {
 const processOrderAction = async (msg, selectedBtn) => {
     let updateOrder
     const status = selectedBtn
-    const chatId = msg.chat.id
+    const userChatId = msg.chat.id
     const orderCode = msg?.text && (match = msg.text.match(orderIdRegex)) ? match[1] : undefined
 
     if (orderCode) {
         const order = await orderRepo.getOneBy({ code: orderCode })
         order.status == 'Awaiting Confirmation'
             ? (updateOrder = await orderRepo.updateBy({ code: orderCode }, { status }))
-            : bot.sendMessage(chatId, messages.confirm_order_warn2)
+            : bot.sendMessage(userChatId, messages.confirm_order_warn2)
     }
 
     if (updateOrder) {
@@ -304,13 +299,13 @@ const processOrderAction = async (msg, selectedBtn) => {
                 orderCode: updateOrder?.code || null,
                 shopName: updateOrder.shop_name,
             })
-            const ownerMsg = populateTemplate(messages.receive_confirm_order_msg, {
+            const shopMsg = populateTemplate(messages.receive_confirm_order_msg, {
                 orderCode: updateOrder?.code || null,
                 customerName: updateOrder.customer_name,
             })
-            const ownerChatId = updateOrder.shop_platform_id
-            bot.sendMessage(chatId, userMsg)
-            bot.sendMessage(ownerChatId, ownerMsg)
+            const shopChatId = updateOrder.shop_platform_id
+            bot.sendMessage(userChatId, userMsg)
+            bot.sendMessage(shopChatId, shopMsg)
         }
 
         if (updateOrder.status === 'Canceled') {
@@ -318,13 +313,13 @@ const processOrderAction = async (msg, selectedBtn) => {
                 orderCode: updateOrder?.code || null,
                 shopName: updateOrder.shop_name,
             })
-            const ownerMsg = populateTemplate(messages.receive_cancel_order_msg, {
+            const shopMsg = populateTemplate(messages.receive_cancel_order_msg, {
                 orderCode: updateOrder?.code || null,
                 customerName: updateOrder.customer_name,
             })
-            const ownerChatId = updateOrder.shop_platform_id
-            bot.sendMessage(chatId, userMsg)
-            bot.sendMessage(ownerChatId, ownerMsg)
+            const shopChatId = updateOrder.shop_platform_id
+            bot.sendMessage(userChatId, userMsg)
+            bot.sendMessage(shopChatId, shopMsg)
         }
 
         broadcastMessage(JSON.stringify({ channel: 'Update', data: updateOrder }))
@@ -335,22 +330,22 @@ const processOrderAction = async (msg, selectedBtn) => {
 const processUser = async (msg) => {
     let customer
     let needUpdated = false
-    const chatId = msg.chat.id
-    customer = await customerRepo.getOneBy({ platform_id: chatId })
+    const userChatId = msg.chat.id
+    customer = await customerRepo.getOneBy({ platform_id: userChatId })
 
     if (!customer) {
         const { first_name: fullname, username } = msg.chat
         customer = await customerRepo.create({
-            platform_id: chatId,
+            platform_id: userChatId,
             username: username || 'nilusr',
             fullname: fullname || faker.person.fullName(),
         })
-        await bot.sendMessage(chatId, messages.welcome_msg)
+        await bot.sendMessage(userChatId, messages.welcome_msg)
     }
 
     if (!customer.is_verified) {
         needUpdated = true
-        await setUserDetail(chatId, {
+        await setUserDetail(userChatId, {
             phoneReqd: true,
             addressReqd: true,
         })
@@ -358,12 +353,12 @@ const processUser = async (msg) => {
 
     if (!customer.phone) {
         needUpdated = true
-        await setUserDetail(chatId, { phoneReqd: true })
+        await setUserDetail(userChatId, { phoneReqd: true })
     }
 
     if (!customer.address) {
         needUpdated = true
-        await setUserDetail(chatId, { addressReqd: true })
+        await setUserDetail(userChatId, { addressReqd: true })
     }
 
     return [customer, needUpdated]
@@ -371,14 +366,14 @@ const processUser = async (msg) => {
 
 // Process user's message according to current state
 const processMessage = async (msg) => {
-    const chatId = msg.chat.id
+    const userChatId = msg.chat.id
 
     if (msg.location) {
         const location = msg.location
         const replyMsg = msg.reply_to_message
         const orderCode = replyMsg?.text && (match = replyMsg.text.match(orderIdRegex)) ? match[1] : undefined
 
-        console.info('💬 Processing loc message', chatId, location, orderCode)
+        console.info('💬 Processing loc message', userChatId, location, orderCode)
 
         if (location) {
             const userLocation = { ...location, google_map: generateGoogleLink(location) }
@@ -386,36 +381,36 @@ const processMessage = async (msg) => {
             if (orderCode) {
                 const updateOrder = await orderRepo.updateBy({ code: orderCode }, userLocation)
                 if (orderCode) {
-                    const ownerChatId = updateOrder.shop_platform_id
+                    const shopChatId = updateOrder.shop_platform_id
                     const userMsg = populateTemplate(messages.send_location_msg, { orderCode: updateOrder.code })
-                    const ownerMsg = populateTemplate(messages.receive_location_msg, {
+                    const shopMsg = populateTemplate(messages.receive_location_msg, {
                         orderCode: updateOrder.code,
                         customerName: updateOrder.customer_name,
                     })
-                    bot.sendMessage(ownerChatId, ownerMsg)
-                    bot.sendLocation(ownerChatId, updateOrder.latitude, updateOrder.longitude)
-                    bot.sendMessage(chatId, userMsg || messages.show_location_warn)
+                    bot.sendMessage(shopChatId, shopMsg)
+                    bot.sendLocation(shopChatId, updateOrder.latitude, updateOrder.longitude)
+                    bot.sendMessage(userChatId, userMsg || messages.show_location_warn)
                     broadcastMessage(JSON.stringify({ channel: 'Update', data: updateOrder }))
                 }
             } else {
                 console.info('💬 Processing loc message (ios)', JSON.stringify(msg))
 
                 const statusQuery = {
-                    platform_id: chatId,
+                    platform_id: userChatId,
                     status: { $in: ['Pending', 'Awaiting Confirmation', 'Confirmed'] },
                 }
                 const userOrder = await orderRepo.getOneBy(statusQuery)
-                const updateOrders = await orderRepo.updateMany({ query }, userLocation)
+                const updateOrders = await orderRepo.updateMany(statusQuery, userLocation)
                 if (updateOrders.modifiedCount > 0 && userOrder) {
-                    const ownerChatId = userOrder.shop_platform_id
+                    const shopChatId = userOrder.shop_platform_id
                     const userMsg = populateTemplate(messages.send_location_msg, { orderCode: 'အားလုံး' })
-                    const ownerMsg = populateTemplate(messages.receive_location_msg, {
+                    const shopMsg = populateTemplate(messages.receive_location_msg, {
                         orderCode: userOrder.code,
                         customerName: userOrder.customer_name,
                     })
-                    bot.sendMessage(ownerChatId, ownerMsg)
-                    bot.sendLocation(ownerChatId, userOrder.latitude, userOrder.longitude)
-                    bot.sendMessage(chatId, userMsg || messages.show_location_warn)
+                    bot.sendMessage(shopChatId, shopMsg)
+                    bot.sendLocation(shopChatId, userOrder.latitude, userOrder.longitude)
+                    bot.sendMessage(userChatId, userMsg || messages.show_location_warn)
                     broadcastMessage(JSON.stringify({ channel: 'Update', data: userOrder }))
                 }
             }
@@ -425,37 +420,37 @@ const processMessage = async (msg) => {
 
     if (msg.text) {
         const text = msg.text?.toLowerCase() || ''
-        console.info('💬 Processing pure message', chatId, text, text?.startsWith('/'))
+        console.info('💬 Processing pure message', userChatId, text, text?.startsWith('/'))
 
         if (text?.startsWith('/')) {
             return // skip command msg
         }
 
         // Registration
-        if (userDetails[chatId]) {
-            const { phoneReqd, addressReqd } = userDetails[chatId]
+        if (userDetails[userChatId]) {
+            const { phoneReqd, addressReqd } = userDetails[userChatId]
 
             if (phoneReqd && text) {
-                await customerRepo.updateBy({ platform_id: chatId }, { phone: msg.text })
-                await bot.sendMessage(chatId, messages.ask_address_msg)
-                await setUserDetail(chatId, { phoneReqd: false })
+                await customerRepo.updateBy({ platform_id: userChatId }, { phone: msg.text })
+                await bot.sendMessage(userChatId, messages.ask_address_msg)
+                await setUserDetail(userChatId, { phoneReqd: false })
                 return
             }
 
             if (addressReqd && text) {
-                await customerRepo.updateBy({ platform_id: chatId }, { address: msg.text, is_verified: true })
-                await bot.sendMessage(chatId, messages.complete_user_msg, profileMenuOptions())
-                await setUserDetail(chatId, { addressReqd: false })
+                await customerRepo.updateBy({ platform_id: userChatId }, { address: msg.text, is_verified: true })
+                await bot.sendMessage(userChatId, messages.complete_user_msg, profileMenuOptions())
+                await setUserDetail(userChatId, { addressReqd: false })
                 return
             }
         }
 
         // Ordering
-        if (!userStates[chatId]) {
-            await setUserState(chatId, states.$shop)
+        if (!userStates[userChatId]) {
+            await setUserState(userChatId, states.$shop)
         }
 
-        const { state, selectedShop, selectedCategory, selectedProduct } = userStates[chatId]
+        const { state, selectedShop, selectedCategory, selectedProduct } = userStates[userChatId]
         // console.info('💬 Processing order ', state, selectedShop, selectedCategory, selectedProduct)
 
         switch (state) {
@@ -463,10 +458,10 @@ const processMessage = async (msg) => {
                 const shopIndex = parseInt(text) - 1
                 if (shopIndex >= 0 && shopIndex < shops.length) {
                     const shop = shops[shopIndex]
-                    await setUserState(chatId, states.$category, { selectedShop: shop })
-                    await showCategoryMenu(chatId, shop)
+                    await setUserState(userChatId, states.$category, { selectedShop: shop })
+                    await showCategoryMenu(userChatId, shop)
                 } else {
-                    bot.sendMessage(chatId, messages.select_shop_warn)
+                    bot.sendMessage(userChatId, messages.select_shop_warn)
                 }
                 break
             }
@@ -475,10 +470,10 @@ const processMessage = async (msg) => {
                 const categoryIndex = parseInt(text) - 1
                 if (selectedShop && categoryIndex >= 0 && categoryIndex < selectedShop.categories.length) {
                     const category = selectedShop.categories[categoryIndex]
-                    await setUserState(chatId, states.$product, { selectedCategory: category })
-                    await showProducts(chatId, category)
+                    await setUserState(userChatId, states.$product, { selectedCategory: category })
+                    await showProducts(userChatId, category)
                 } else {
-                    bot.sendMessage(chatId, messages.select_category_warn)
+                    bot.sendMessage(userChatId, messages.select_category_warn)
                 }
                 break
             }
@@ -487,10 +482,10 @@ const processMessage = async (msg) => {
                 const productIndex = parseInt(text) - 1
                 if (selectedCategory && productIndex >= 0 && productIndex < selectedCategory.items.length) {
                     const product = selectedCategory.items[productIndex]
-                    await setUserState(chatId, states.$add_to_cart, { selectedProduct: product })
-                    await showProductDetails(chatId, product)
+                    await setUserState(userChatId, states.$add_to_cart, { selectedProduct: product })
+                    await showProductDetails(userChatId, product)
                 } else {
-                    bot.sendMessage(chatId, messages.select_product_warn)
+                    bot.sendMessage(userChatId, messages.select_product_warn)
                 }
                 break
             }
@@ -498,21 +493,21 @@ const processMessage = async (msg) => {
             case states.$add_to_cart: {
                 const quantity = parseInt(text)
                 if (!isNaN(quantity) && quantity > 0) {
-                    await addToCartItem(chatId, selectedProduct, quantity)
+                    await addToCartItem(userChatId, selectedProduct, quantity)
                     const message = populateTemplate(messages.add_to_cart_msg, {
                         productName: selectedProduct.name,
                         quantity: quantity,
                     })
-                    bot.sendMessage(chatId, message)
-                    bot.sendMessage(chatId, messages.ask_checkout_msg, showCartOptions())
+                    bot.sendMessage(userChatId, message)
+                    bot.sendMessage(userChatId, messages.ask_checkout_msg, showCartOptions())
                 } else {
-                    bot.sendMessage(chatId, messages.select_quantity_warn)
+                    bot.sendMessage(userChatId, messages.select_quantity_warn)
                 }
                 break
             }
 
             case states.$checkout: {
-                const cart = userCarts[chatId]
+                const cart = userCarts[userChatId]
                 const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
                 const orderSummary = cart
                     .map(
@@ -521,7 +516,7 @@ const processMessage = async (msg) => {
                     .join('\n')
 
                 try {
-                    const customer = await customerRepo.getOneBy({ platform_id: chatId })
+                    const customer = await customerRepo.getOneBy({ platform_id: userChatId })
                     const orderRes = await orderRepo.create(createOrderPayload(selectedShop, customer, cart))
 
                     const baseData = {
@@ -535,9 +530,9 @@ const processMessage = async (msg) => {
                         ...baseData,
                         customerName: orderRes.customer_name,
                     }
-                    const ownerChatId = selectedShop.receiverId
-                    const ownerMsg = populateTemplate(messages.receive_order_msg, dataForOwner)
-                    await bot.sendMessage(ownerChatId, escapeMarkdownV2(ownerMsg), { parse_mode: 'MarkdownV2' })
+                    const shopChatId = selectedShop.receiverId
+                    const shopMsg = populateTemplate(messages.receive_order_msg, dataForOwner)
+                    await bot.sendMessage(shopChatId, escapeMarkdownV2(shopMsg), { parse_mode: 'MarkdownV2' })
 
                     // Send confirmation to the customer
                     const dataForUser = {
@@ -547,17 +542,17 @@ const processMessage = async (msg) => {
                     }
                     const userMsg = populateTemplate(messages.confirm_order_msg, dataForUser)
                     const locationMsg = populateTemplate(messages.ask_location_msg, { orderCode: orderRes.code })
-                    await bot.sendMessage(chatId, escapeMarkdownV2(userMsg), { parse_mode: 'MarkdownV2' })
-                    await bot.sendMessage(chatId, locationMsg, locationMenuOptions())
+                    await bot.sendMessage(userChatId, escapeMarkdownV2(userMsg), { parse_mode: 'MarkdownV2' })
+                    await bot.sendMessage(userChatId, locationMsg, locationMenuOptions())
 
                     // Broadcast new order to the owner
                     broadcastMessage(JSON.stringify({ channel: 'New', data: orderRes }))
 
                     // Update user state and reset cart
-                    await setUserState(chatId, states.$shop)
-                    await resetUserCart(chatId)
+                    await setUserState(userChatId, states.$shop)
+                    await resetUserCart(userChatId)
                 } catch (err) {
-                    await bot.sendMessage(chatId, messages.confirm_order_warn)
+                    await bot.sendMessage(userChatId, messages.confirm_order_warn)
                     console.error(err)
                 }
 
@@ -565,8 +560,8 @@ const processMessage = async (msg) => {
             }
 
             default: {
-                await setUserState(chatId, states.$shop)
-                await showShopMenu(chatId)
+                await setUserState(userChatId, states.$shop)
+                await showShopMenu(userChatId)
             }
         }
     }
@@ -574,21 +569,21 @@ const processMessage = async (msg) => {
 
 // Process user to be authenticated for making order
 const handleUserPermission = async (msg) => {
-    const chatId = msg.chat.id
+    const userChatId = msg.chat.id
     const [_, needUpdated] = await processUser(msg)
-    return !needUpdated || (await bot.sendMessage(chatId, messages.ask_phone_msg), false)
+    return !needUpdated || (await bot.sendMessage(userChatId, messages.ask_phone_msg), false)
 }
 
 // Process user actin to avoid some errors
 const handleUserAction = async (msg) => {
-    const chatId = msg.chat.id
-    const cart = userCarts[chatId]
-    const userState = userStates[chatId]
+    const userChatId = msg.chat.id
+    const cart = userCarts[userChatId]
+    const userState = userStates[userChatId]
     const selectedShop = userState?.selectedShop
 
     if ((cart && cart.length === 0) || !selectedShop) {
-        await setUserState(chatId, states.$shop)
-        await showShopMenu(chatId)
+        await setUserState(userChatId, states.$shop)
+        await showShopMenu(userChatId)
         return false
     }
     return true
@@ -596,39 +591,39 @@ const handleUserAction = async (msg) => {
 
 // Handle the /start command
 bot.onText(/\/start/, async (msg) => {
-    const chatId = msg.chat.id
+    const userChatId = msg.chat.id
     if (!(await handleUserPermission(msg))) return
-    await setUserState(chatId, states.$shop)
-    await showShopMenu(chatId)
+    await setUserState(userChatId, states.$shop)
+    await showShopMenu(userChatId)
     return
 })
 
 // Handle the /my_info command to customer info
 bot.onText(/\/my_info/, async (msg) => {
-    const chatId = msg.chat.id
+    const userChatId = msg.chat.id
     if (!(await handleUserPermission(msg))) return
-    await showCustomerInfo(chatId)
+    await showCustomerInfo(userChatId)
 })
 
 // Handle the /my_cart command to show current cart
 bot.onText(/\/my_cart/, async (msg) => {
-    const chatId = msg.chat.id
+    const userChatId = msg.chat.id
     if (!(await handleUserPermission(msg))) return
-    await showCartSummary(chatId)
+    await showCartSummary(userChatId)
 })
 
 // Handle the /my_order command to show uncompleted order
 bot.onText(/\/my_order/, async (msg) => {
-    const chatId = msg.chat.id
+    const userChatId = msg.chat.id
     if (!(await handleUserPermission(msg))) return
-    await showOrderList(chatId)
+    await showOrderList(userChatId)
 })
 
 // Handle the /about command to show about bot
 bot.onText(/\/about/, async (msg) => {
-    const chatId = msg.chat.id
+    const userChatId = msg.chat.id
     const message = populateTemplate(messages.bot_info_msg, { supportMsg: messages.support_me_msg })
-    bot.sendMessage(chatId, message, mainMenuOptions({ visitUs: true }))
+    bot.sendMessage(userChatId, message, mainMenuOptions({ visitUs: true }))
 })
 
 // Handle all other messages
@@ -643,41 +638,41 @@ bot.on('callback_query', async (callbackQuery) => {
 
     if (!(await handleUserPermission(msg))) return
 
-    const chatId = msg.chat.id
-    const userState = userStates[chatId]
+    const userChatId = msg.chat.id
+    const userState = userStates[userChatId]
     const selectedShop = userState?.selectedShop
 
     switch (data) {
         case actions.restart.id:
-            await setUserState(chatId, states.$shop)
-            await showShopMenu(chatId)
+            await setUserState(userChatId, states.$shop)
+            await showShopMenu(userChatId)
             break
 
         case actions.edit_info.id:
             const updateData = { phone: undefined, address: undefined, is_verified: false }
-            await customerRepo.updateBy({ platform_id: chatId }, updateData)
+            await customerRepo.updateBy({ platform_id: userChatId }, updateData)
             await handleUserPermission(msg)
             break
 
         case actions.view_cart.id:
             if (!(await handleUserAction(msg))) return
-            await showCartSummary(chatId)
+            await showCartSummary(userChatId)
             break
 
         case actions.empty_cart.id:
-            await resetUserCart(chatId)
+            await resetUserCart(userChatId)
             await handleUserAction(msg)
             break
 
         case actions.continue.id:
             if (!(await handleUserAction(msg))) return
-            await setUserState(chatId, states.$category)
-            await showCategoryMenu(chatId, selectedShop)
+            await setUserState(userChatId, states.$category)
+            await showCategoryMenu(userChatId, selectedShop)
             break
 
         case actions.checkout.id:
             if (!(await handleUserAction(msg))) return
-            await setUserState(chatId, states.$checkout)
+            await setUserState(userChatId, states.$checkout)
             await processMessage(msg)
             break
 

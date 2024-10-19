@@ -405,7 +405,7 @@ const processMessage = async (msg) => {
                 console.info('💬 Processing loc message (ios) - userOrders', JSON.stringify(userOrders))
                 console.info('💬 Processing loc message (ios) - updateOrders', JSON.stringify(updateOrders))
 
-                if (updateOrders.nModified > 0 && userOrders) {
+                if (updateOrders.ok && userOrders) {
                     for (const order of userOrders) {
                         const shopChatId = order.shop_platform_id
                         const userMsg = populateTemplate(messages.send_location_msg, { orderCode: 'အားလုံး' })

@@ -41,12 +41,12 @@ utils.populateTemplate = (template, data) => {
 
 utils.populateOrderStatus = (status) => {
     return {
-        Pending: 'စောင့်ဆိုင်းနေပါပြီ ⏰',
-        'Awaiting Confirmation': 'အတည်ပြုရန် ⏰',
-        Confirmed: 'အတည်ပြုပြီးပါပြီ ✅',
-        Accepted: 'လက်ခံရရှိပါပြီ ✅',
-        Completed: 'ပို့ဆောင်ပြီးပါပြီ ✅',
-        Canceled: 'အမှာစာ လက်မခံပါ ❌',
+        Pending: 'Pending',
+        'Awaiting Confirmation': 'Awaiting Confirmation',
+        Confirmed: 'Confirmed',
+        Accepted: 'Accepted',
+        Completed: 'Completed',
+        Canceled: 'Canceled',
     }[status]
 }
 
@@ -58,8 +58,8 @@ utils.createOrderPayload = (shop, customer, orderCart) => {
         code: orderCode,
         shop_name: shop.name,
         shop_platform_id: shop.receiverId,
-        // customer_name: faker.person.fullName(),
         // customer_phone: faker.phone.imei(),
+        // customer_name: faker.person.fullName(),
         // customer_addr: faker.location.streetAddress(),
         customer_name: customer.fullname,
         customer_phone: customer.phone,

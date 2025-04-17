@@ -17,7 +17,8 @@ const createOrderAction = async (req, res) => {
             })
             broadcastMessage(JSON.stringify({ channel: 'Update', data: updateOrder }))
         }
-        await showOrderActionMsg(newOrderAction) // Send message to customer via telegram bot
+        // Send msg to customer via telegram bot
+        await showOrderActionMsg(newOrderAction)
         res.success(newOrderAction)
     } catch (error) {
         res.serverError(error?.message || 'Something went wrong')

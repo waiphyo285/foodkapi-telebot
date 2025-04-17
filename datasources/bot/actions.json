@@ -1,42 +1,42 @@
 {
     "restart": {
         "id": "restart",
-        "text": "🚴 မှာစားမည်"
+        "text": "🚴 Restart"
     },
     "edit_info": {
         "id": "edit_info",
-        "text": "📝 ပြင်ဆင်မည်"
+        "text": "📝 Edit Info"
     },
     "view_cart": {
         "id": "view_cart",
-        "text": "🛒 ကြည့်မည်"
+        "text": "🛒 View Cart"
     },
     "empty_cart": {
         "id": "empty_cart",
-        "text": "❎ မမှာတော့ပါ"
+        "text": "❎ Empty Cart"
     },
     "continue": {
         "id": "continue",
-        "text": "🔍 ဆက်ဝယ်မည်"
+        "text": "🔍 Continue Shopping"
     },
     "checkout": {
         "id": "checkout",
-        "text": "🛍️ မှာယူမည်"
+        "text": "🛍️ Checkout"
     },
     "send_loc": {
         "id": "send_loc",
-        "text": "📌 တည်နေရာပို့မည်"
+        "text": "📌 Send Location"
     },
     "visit_us": {
         "id": "www.neohubasia.com",
-        "text": "🌐 ဝဘ်ဆိုက်"
+        "text": "🌐 Visit Us"
     },
     "cancel_order": {
         "id": "cancel_order",
-        "text": "❎  ပယ်ဖျက်မည်"
+        "text": "❎ Cancel Order"
     },
     "confirm_order": {
         "id": "confirm_order",
-        "text": "✅ အတည်ပြုမည်"
+        "text": "✅ Confirm Order"
     }
 }

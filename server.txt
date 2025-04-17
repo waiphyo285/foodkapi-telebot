@@ -1,1 +1,0 @@
-sudo ssh -i /Users/waiphyo/Documents/Neohub/hyperpos-core/config/rsa-ssh/pos-starter.pem ubuntu@18.141.145.16
